@@ -655,6 +655,7 @@ export async function pasteMarkdownAsEmbeddable(
       pointer.x <= x + width &&
       pointer.y >= y &&
       pointer.y <= y + height;
+    ea.clear();
     const id = await insertEmbeddableToView(
       ea,
       isPointerVisible ? pointer : ea.getViewCenterPosition(),
@@ -662,7 +663,11 @@ export async function pasteMarkdownAsEmbeddable(
       // the full path: a shortest link would resolve to another note that
       // shares the basename
       `[[${file.path}]]`,
+      false,
     );
+    // pasted cards have no border, whatever the current stroke color is
+    ea.getElement(id).strokeColor = "transparent";
+    await ea.addElementsToView(false, true, true);
     ea.selectElementsInView([id]);
     return id;
   } catch (error) {
@@ -691,6 +696,7 @@ export async function addBackOfTheNoteCard(
   embeddableCustomData?: EmbeddableMDCustomProps,
   center: boolean = false,
   position?: { x: number; y: number },
+  strokeColor?: string,
 ): Promise<string> {
   insertBackOfTheNoteContent(
     view,
@@ -735,6 +741,9 @@ export async function addBackOfTheNoteCard(
     }
   }
 
+  if (strokeColor) {
+    ea.style.strokeColor = strokeColor;
+  }
   const id = ea.addEmbeddable(
     x,
     y,

@@ -47,6 +47,9 @@ It also fixes an upstream glitch: enlarging a Markdown embeddable left the
 newly revealed area blank until the card was edited, because the reading view
 was never told about the new size.
 
+Pasted cards (Markdown and code block) get a transparent border regardless of
+the current stroke color.
+
 ## Known limits
 
 - Selection handles are still painted beneath embeddables (upstream behaviour).

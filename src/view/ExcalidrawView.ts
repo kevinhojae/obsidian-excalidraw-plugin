@@ -7009,7 +7009,16 @@ export default class ExcalidrawView
         }
         title = `${title} ${i}`;
       }
-      await addBackOfTheNoteCard(this, title, false, data);
+      await addBackOfTheNoteCard(
+        this,
+        title,
+        false,
+        data,
+        undefined,
+        false,
+        undefined,
+        "transparent",
+      );
     } catch (error) {
       console.error(
         "unexpected error in pasteCodeBlock",
