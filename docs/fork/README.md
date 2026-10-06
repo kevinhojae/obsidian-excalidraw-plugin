@@ -8,8 +8,8 @@ replaces the community build instead of running next to it.
 - **Paste Markdown as embeddable** (canvas context menu and command palette,
   no default hotkey). Saves the clipboard text unchanged as a new note in
   `<drawing folder>/Excalidraw Cards/` and embeds it at the pointer. The note
-  is named after its first line; existing notes are never overwritten, and
-  deleting or undoing the card keeps the note.
+  gets a unique id as its name (`<timestamp>-<random>.md`); existing notes are
+  never overwritten, and deleting or undoing the card keeps the note.
 - **Annotations above embeddables.** Elements that follow an embeddable in
   scene order are painted above it, so `A -> line -> B` shows the line over A
   and under B. Applies to every embeddable, not only pasted cards. This needs
@@ -24,7 +24,6 @@ done (or set `EXCALIDRAW_FORK_ROOT`):
 ```bash
 npm ci
 node scripts/build-with-engine-fork.mjs   # builds the engine, then dist/
-node --test scripts/testing/unit/*.test.ts
 ```
 
 ## Install and roll back
@@ -42,6 +41,10 @@ and include `data.json`, which the script never writes. Updating Excalidraw
 from Obsidian's community plugin list overwrites this build with upstream;
 drawings and card notes stay intact, annotations then show beneath embeddables
 again.
+
+It also fixes an upstream glitch: enlarging a Markdown embeddable left the
+newly revealed area blank until the card was edited, because the reading view
+was never told about the new size.
 
 ## Known limits
 

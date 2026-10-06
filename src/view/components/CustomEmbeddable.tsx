@@ -963,6 +963,15 @@ function RenderObsidianView({
   }, [linkText, subpath, containerRef, element.id, file.path]);
 
   //--------------------------------------------------------------------------------
+  //The reading view renders only the sections that fit its container, so it
+  //must be told when the element is resized
+  //--------------------------------------------------------------------------------
+  React.useEffect(() => {
+    leafRef.current?.node?.child?.previewMode?.renderer?.onResize?.();
+    leafRef.current?.leaf?.view?.onResize?.();
+  }, [element.width, element.height]);
+
+  //--------------------------------------------------------------------------------
   //Set colors of the canvas node
   //--------------------------------------------------------------------------------
   function roundEmbeddableSize(value: number): number {

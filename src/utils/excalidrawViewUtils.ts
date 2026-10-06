@@ -31,12 +31,7 @@ import {
   FileId,
   NonDeletedExcalidrawElement,
 } from "@zsviczian/excalidraw/types/element/src/types";
-import {
-  checkAndCreateFolder,
-  getNestedFileDependencyGraph,
-  getNewUniqueFilepath,
-} from "./fileUtils";
-import { getMarkdownCardBasename } from "./markdownCardFilename";
+import { checkAndCreateFolder, getNestedFileDependencyGraph } from "./fileUtils";
 import { getMatchingTopLevelDependencyKeys } from "./nestedDependencyTraversal";
 import {
   getEmbeddedFilenameParts,
@@ -647,11 +642,9 @@ export async function pasteMarkdownAsEmbeddable(
   const folder = await checkAndCreateFolder(
     `${drawingFolder}/${MARKDOWN_CARD_FOLDER}`,
   );
-  const basename = getMarkdownCardBasename(markdown) || "Markdown card";
-  const file = await vault.create(
-    getNewUniqueFilepath(vault, `${basename}.md`, folder.path),
-    markdown,
-  );
+  // an id rather than a title: the note is found through its card
+  const id = `${window.moment().format("YYYYMMDDHHmmss")}-${nanoid(4)}`;
+  const file = await vault.create(`${folder.path}/${id}.md`, markdown);
 
   const ea = getEA(view);
   try {

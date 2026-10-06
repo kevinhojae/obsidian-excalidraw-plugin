@@ -52,6 +52,7 @@ export interface ObsidianCanvasNodeChild extends View {
     containerEl?: HTMLElement;
   };
   showPreview?(): void;
+  previewMode?: { renderer?: { onResize?: () => void } };
 }
 
 export interface ObsidianCanvasNode {
