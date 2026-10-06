@@ -192,6 +192,7 @@ import { setDynamicStyle } from "../utils/dynamicStyling";
 import { CustomEmbeddable, renderWebView } from "./components/CustomEmbeddable";
 import {
   addBackOfTheNoteCard,
+  pasteMarkdownAsEmbeddable,
   insertBackOfTheNoteContent,
   addTextWithOEmbed,
   deleteAppStateKeys,
@@ -7530,6 +7531,20 @@ export default class ExcalidrawView
           },
           onClose,
           "pasteCodeblock",
+        ),
+        renderContextMenuAction(
+          React,
+          t("PASTE_MARKDOWN_EMBEDDABLE"),
+          () => {
+            void (async () => {
+              await pasteMarkdownAsEmbeddable(
+                this,
+                await navigator.clipboard?.readText(),
+              );
+            })();
+          },
+          onClose,
+          "pasteMarkdownEmbeddable",
         ),
       ]);
 

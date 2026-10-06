@@ -256,6 +256,10 @@ export default {
   CONVERT_CARD_TO_FILE: "Move back-of-note card to File",
   ERROR_TRY_AGAIN: "Please try again.",
   PASTE_CODEBLOCK: "Paste code block",
+  PASTE_MARKDOWN_EMBEDDABLE: "Paste Markdown as embeddable",
+  PASTE_MARKDOWN_EMPTY: "The clipboard has no text to paste.",
+  PASTE_MARKDOWN_INSERT_FAILED:
+    "The Markdown was saved but could not be added to the drawing. Saved to:",
   INVERT_IMAGES_IN_DARK_MODE: "Invert image(s) in dark mode",
   INSERT_LATEX: `Insert LaTeX formula (e.g. \\binom{n}{k} = \\frac{n!}{k!(n-k)!}).`,
   ENTER_LATEX: "Enter a valid LaTeX expression",

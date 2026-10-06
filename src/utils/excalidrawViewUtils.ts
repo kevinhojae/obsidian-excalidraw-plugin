@@ -31,7 +31,12 @@ import {
   FileId,
   NonDeletedExcalidrawElement,
 } from "@zsviczian/excalidraw/types/element/src/types";
-import { getNestedFileDependencyGraph } from "./fileUtils";
+import {
+  checkAndCreateFolder,
+  getNestedFileDependencyGraph,
+  getNewUniqueFilepath,
+} from "./fileUtils";
+import { getMarkdownCardBasename } from "./markdownCardFilename";
 import { getMatchingTopLevelDependencyKeys } from "./nestedDependencyTraversal";
 import {
   getEmbeddedFilenameParts,
@@ -618,6 +623,68 @@ export function getFrameBasedOnFrameNameOrId(
     .filter((item) => item.id === frameName || item.name === frameName)
     .map((item) => item.el);
   return frames.length === 1 ? frames[0] : null;
+}
+
+const MARKDOWN_CARD_FOLDER = "Excalidraw Cards";
+
+/**
+ * Saves the markdown as a new note next to the drawing and embeds that note
+ * at the pointer. The text is written as-is; an existing note is never
+ * overwritten.
+ */
+export async function pasteMarkdownAsEmbeddable(
+  view: ExcalidrawView,
+  markdown: string,
+): Promise<string | null> {
+  if (!markdown || markdown.trim() === "") {
+    new Notice(t("PASTE_MARKDOWN_EMPTY"));
+    return null;
+  }
+  const { vault } = view.app;
+  const drawingFolder = view.file.parent?.isRoot()
+    ? ""
+    : view.file.parent?.path ?? "";
+  const folder = await checkAndCreateFolder(
+    `${drawingFolder}/${MARKDOWN_CARD_FOLDER}`,
+  );
+  const basename = getMarkdownCardBasename(markdown) || "Markdown card";
+  const file = await vault.create(
+    getNewUniqueFilepath(vault, `${basename}.md`, folder.path),
+    markdown,
+  );
+
+  const ea = getEA(view);
+  try {
+    const { x, y, width, height } = getSceneViewport(ea);
+    const pointer = view.currentPosition;
+    const isPointerVisible =
+      pointer.x >= x &&
+      pointer.x <= x + width &&
+      pointer.y >= y &&
+      pointer.y <= y + height;
+    const id = await insertEmbeddableToView(
+      ea,
+      isPointerVisible ? pointer : ea.getViewCenterPosition(),
+      file,
+    );
+    ea.selectElementsInView([id]);
+    return id;
+  } catch (error) {
+    new Notice(`${t("PASTE_MARKDOWN_INSERT_FAILED")} ${file.path}`, 10000);
+    throw error;
+  } finally {
+    ea.destroy();
+  }
+}
+
+function getSceneViewport(ea: ExcalidrawAutomate) {
+  const st = ea.getExcalidrawAPI().getAppState();
+  return {
+    x: -st.scrollX,
+    y: -st.scrollY,
+    width: st.width / st.zoom.value,
+    height: st.height / st.zoom.value,
+  };
 }
 
 export async function addBackOfTheNoteCard(

@@ -86,7 +86,10 @@ import {
   createImageCropperFile,
 } from "../../utils/carveout";
 import { showFrameSettings } from "../../shared/Dialogs/FrameSettings";
-import { insertImageToView } from "../../utils/excalidrawViewUtils";
+import {
+  insertImageToView,
+  pasteMarkdownAsEmbeddable,
+} from "../../utils/excalidrawViewUtils";
 import type ExcalidrawPlugin from "src/core/main";
 import { UIModeSettings } from "src/shared/Dialogs/UIModeSettings";
 import { PaneTarget } from "src/types/utilTypes";
@@ -267,6 +270,26 @@ export class CommandManager {
           return true;
         }
         void view.convertImageElWithURLToLocalFile(img);
+      },
+    });
+
+    this.addCommand({
+      id: "excalidraw-paste-markdown-embeddable",
+      name: t("PASTE_MARKDOWN_EMBEDDABLE"),
+      checkCallback: (checking: boolean) => {
+        const view = this.app.workspace.getActiveViewOfType(ExcalidrawView);
+        if (!view) {
+          return false;
+        }
+        if (checking) {
+          return true;
+        }
+        void (async () => {
+          await pasteMarkdownAsEmbeddable(
+            view,
+            await navigator.clipboard?.readText(),
+          );
+        })();
       },
     });
 
