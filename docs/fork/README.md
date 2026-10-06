@@ -46,8 +46,10 @@ again.
 ## Known limits
 
 - Selection handles are still painted beneath embeddables (upstream behaviour).
-- Each embeddable with elements above it adds one viewport-sized canvas.
-  Drawings that interleave many embeddables with shapes use more memory.
+- Each visible embeddable with elements above it adds one viewport-sized
+  canvas. Measured worst case: 20 cards with 10 lines after each, all on
+  screen, created 21 canvases of 1164x1741 px, about 170 MB of canvas memory
+  in a half-width pane (roughly 2.5x that in a full window).
 - Annotations stay at their canvas position; they do not follow text when a
   card is scrolled or edited.
 - Image export is unchanged: embeddables export as placeholders, as upstream.
@@ -62,13 +64,16 @@ again.
 | line / arrow / freedraw above a card, 50% opacity uniform across the border | pass |
 | `A -> line -> B -> line` depth order, B transparent | pass |
 | Drawing over a card with real pointer input, visible while drawing | pass |
-| Activate card, drag-select text beneath annotations | pass |
+| Activate card, drag-select a full sentence beneath annotations | pass |
+| Pasted card links by full vault path | pass |
+| Existing back-of-note (code block) card with an arrow above it | pass |
+| Dark theme: annotations above cards | pass |
 | Send to back / undo follow the scene order | pass |
 | Save, reload the vault window: order and layers persist | pass |
 | PNG export still works | pass |
 | Install / rollback script on the test vault | pass |
-| Cmd+C clipboard content, editing in a card, Korean IME | not tested |
+| Cmd+C of selected card text | blocked: a synthetic key press copied the element instead; needs one manual check |
+| Editing in a card, Korean IME | not tested |
 | Full app quit and restart | not tested |
-| Dark theme, popout window, frames, rotation, groups | not tested |
-| Existing back-of-note (code block) cards | not tested |
-| 20 cards + 200 annotations performance | not tested |
+| Popout window, frames, rotation, groups | not tested |
+| Pan / zoom frame times with 20 cards + 200 annotations | not tested |

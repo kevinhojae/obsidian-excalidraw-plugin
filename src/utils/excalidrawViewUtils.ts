@@ -665,7 +665,10 @@ export async function pasteMarkdownAsEmbeddable(
     const id = await insertEmbeddableToView(
       ea,
       isPointerVisible ? pointer : ea.getViewCenterPosition(),
-      file,
+      undefined,
+      // the full path: a shortest link would resolve to another note that
+      // shares the basename
+      `[[${file.path}]]`,
     );
     ea.selectElementsInView([id]);
     return id;
