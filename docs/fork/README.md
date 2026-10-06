@@ -12,7 +12,8 @@ replaces the community build instead of running next to it.
   never overwritten, and deleting or undoing the card keeps the note.
 - **Annotations above embeddables.** Elements that follow an embeddable in
   scene order are painted above it, so `A -> line -> B` shows the line over A
-  and under B. Applies to every embeddable, not only pasted cards. This needs
+  and under B, and clicking such an element selects it rather than the
+  embeddable beneath. Applies to every embeddable, not only pasted cards. This needs
   the engine fork: `kevinhojae/excalidraw`, branch
   `feat/embeddable-overlay-bands`.
 
@@ -71,6 +72,8 @@ was never told about the new size.
 | Pasted card links by full vault path | pass |
 | Existing back-of-note (code block) card with an arrow above it | pass |
 | Dark theme: annotations above cards | pass |
+| Click a line / shape above a card selects it; bare card area selects the card; card centre activates it | pass |
+| Enlarging a card renders the newly revealed part of the note | pass (scripted resize) |
 | Send to back / undo follow the scene order | pass |
 | Save, reload the vault window: order and layers persist | pass |
 | PNG export still works | pass |
