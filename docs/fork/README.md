@@ -52,7 +52,8 @@ the current stroke color.
 
 ## Known limits
 
-- Selection handles are still painted beneath embeddables (upstream behaviour).
+- Selection handles are painted above embeddables, except while an embeddable
+  is active (it then has to receive the pointer).
 - Each visible embeddable with elements above it adds one viewport-sized
   canvas. Measured worst case: 20 cards with 10 lines after each, all on
   screen, created 21 canvases of 1164x1741 px, about 170 MB of canvas memory
@@ -77,6 +78,8 @@ the current stroke color.
 | Dark theme: annotations above cards | pass |
 | Click a line / shape above a card selects it; bare card area selects the card; card centre activates it | pass |
 | Enlarging a card renders the newly revealed part of the note | pass (scripted resize) |
+| Selection handles of a line above a card are visible; an activated card still takes the pointer; outside click deactivates | pass |
+| Pasted Markdown and code block cards have a transparent border | pass |
 | Send to back / undo follow the scene order | pass |
 | Save, reload the vault window: order and layers persist | pass |
 | PNG export still works | pass |
