@@ -682,7 +682,7 @@ export async function pasteMarkdownAsEmbeddable(
 }
 
 const FITTED_CARD_MIN_HEIGHT = 80;
-const FITTED_CARD_MAX_HEIGHT = 2000;
+const FITTED_CARD_MAX_HEIGHT = 10000;
 const FITTED_CARD_BOTTOM_SPACE = 8;
 
 /**

@@ -49,7 +49,7 @@ was never told about the new size.
 
 Pasted cards (Markdown and code block) get a transparent border regardless of
 the current stroke color, and their height is fitted to the rendered note
-(80 to 2000 px; a longer note scrolls inside the card). They are 800 px wide.
+(80 to 10000 px; a longer note scrolls inside the card). They are 800 px wide.
 
 ## Known limits
 
