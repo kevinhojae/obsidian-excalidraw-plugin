@@ -621,6 +621,7 @@ export function getFrameBasedOnFrameNameOrId(
 }
 
 const MARKDOWN_CARD_FOLDER = "Excalidraw Cards";
+export const PASTED_CARD_WIDTH = 800;
 
 /**
  * Saves the markdown as a new note next to the drawing and embeds that note
@@ -667,6 +668,7 @@ export async function pasteMarkdownAsEmbeddable(
     );
     // pasted cards have no border, whatever the current stroke color is
     ea.getElement(id).strokeColor = "transparent";
+    ea.getElement(id).width = PASTED_CARD_WIDTH;
     await ea.addElementsToView(false, true, true);
     await fitEmbeddableHeightToContent(view, id);
     ea.selectElementsInView([id]);
@@ -766,6 +768,7 @@ export async function addBackOfTheNoteCard(
   center: boolean = false,
   position?: { x: number; y: number },
   strokeColor?: string,
+  width: number = CARD_WIDTH,
 ): Promise<string> {
   insertBackOfTheNoteContent(
     view,
@@ -816,7 +819,7 @@ export async function addBackOfTheNoteCard(
   const id = ea.addEmbeddable(
     x,
     y,
-    CARD_WIDTH,
+    width,
     CARD_HEIGHT,
     `[[${view.file.path}#${title}]]`,
     undefined,

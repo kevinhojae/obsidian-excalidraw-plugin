@@ -194,6 +194,7 @@ import {
   addBackOfTheNoteCard,
   pasteMarkdownAsEmbeddable,
   fitEmbeddableHeightToContent,
+  PASTED_CARD_WIDTH,
   insertBackOfTheNoteContent,
   addTextWithOEmbed,
   deleteAppStateKeys,
@@ -7019,6 +7020,7 @@ export default class ExcalidrawView
         false,
         undefined,
         "transparent",
+        PASTED_CARD_WIDTH,
       );
       await fitEmbeddableHeightToContent(this, id);
     } catch (error) {
