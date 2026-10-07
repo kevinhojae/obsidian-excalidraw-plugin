@@ -193,6 +193,7 @@ import { CustomEmbeddable, renderWebView } from "./components/CustomEmbeddable";
 import {
   addBackOfTheNoteCard,
   pasteMarkdownAsEmbeddable,
+  fitEmbeddableHeightToContent,
   insertBackOfTheNoteContent,
   addTextWithOEmbed,
   deleteAppStateKeys,
@@ -7009,7 +7010,7 @@ export default class ExcalidrawView
         }
         title = `${title} ${i}`;
       }
-      await addBackOfTheNoteCard(
+      const id = await addBackOfTheNoteCard(
         this,
         title,
         false,
@@ -7019,6 +7020,7 @@ export default class ExcalidrawView
         undefined,
         "transparent",
       );
+      await fitEmbeddableHeightToContent(this, id);
     } catch (error) {
       console.error(
         "unexpected error in pasteCodeBlock",

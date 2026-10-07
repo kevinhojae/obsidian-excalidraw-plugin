@@ -668,12 +668,81 @@ export async function pasteMarkdownAsEmbeddable(
     // pasted cards have no border, whatever the current stroke color is
     ea.getElement(id).strokeColor = "transparent";
     await ea.addElementsToView(false, true, true);
+    await fitEmbeddableHeightToContent(view, id);
     ea.selectElementsInView([id]);
     return id;
   } catch (error) {
     new Notice(`${t("PASTE_MARKDOWN_INSERT_FAILED")} ${file.path}`, 10000);
     throw error;
   } finally {
+    ea.destroy();
+  }
+}
+
+const FITTED_CARD_MIN_HEIGHT = 80;
+const FITTED_CARD_MAX_HEIGHT = 2000;
+const FITTED_CARD_BOTTOM_SPACE = 8;
+
+/**
+ * Sets the height of a just inserted Markdown embeddable to the height of its
+ * rendered note, so the whole note shows without scrolling. A longer note is
+ * capped and scrolls inside the card.
+ */
+export async function fitEmbeddableHeightToContent(
+  view: ExcalidrawView,
+  id: string,
+): Promise<void> {
+  const getReadingView = () =>
+    view.contentEl.querySelector<HTMLElement>(
+      `[id="embed-${id}"] .markdown-preview-view`,
+    );
+  // Obsidian keeps the total height of the note, including sections it has
+  // not rendered yet, as the min-height of the sizer
+  const getContentHeight = (readingView: HTMLElement) =>
+    parseFloat(
+      readingView.querySelector<HTMLElement>(".markdown-preview-sizer")?.style
+        .minHeight,
+    );
+  // the note renders asynchronously, and a resize makes the reading view
+  // render sections it had only estimated, so measure until it settles
+  let settledHeight = 0;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    await sleep(100);
+    const readingView = getReadingView();
+    const element = view.getViewElements().find((el) => el.id === id);
+    if (!element) {
+      return;
+    }
+    const contentHeight = readingView && getContentHeight(readingView);
+    if (!contentHeight) {
+      continue;
+    }
+    const chrome = element.height - readingView.clientHeight;
+    const height = Math.min(
+      Math.max(
+        Math.ceil(contentHeight) + chrome + FITTED_CARD_BOTTOM_SPACE,
+        FITTED_CARD_MIN_HEIGHT,
+      ),
+      FITTED_CARD_MAX_HEIGHT,
+    );
+    if (Math.abs(height - element.height) < 1) {
+      if (settledHeight === height) {
+        return;
+      }
+      settledHeight = height;
+      continue;
+    }
+    const ea = getEA(view);
+    ea.copyViewElementsToEAforEditing([element]);
+    ea.getElement(id).height = height;
+    // part of the insertion, not an undo step of its own
+    await ea.addElementsToView(
+      false,
+      true,
+      false,
+      false,
+      CaptureUpdateAction.NEVER,
+    );
     ea.destroy();
   }
 }

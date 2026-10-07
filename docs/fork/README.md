@@ -48,7 +48,9 @@ newly revealed area blank until the card was edited, because the reading view
 was never told about the new size.
 
 Pasted cards (Markdown and code block) get a transparent border regardless of
-the current stroke color.
+the current stroke color, and their height is fitted to the rendered note
+(80 to 2000 px; a longer note scrolls inside the card). The width stays at the
+upstream default.
 
 ## Known limits
 
