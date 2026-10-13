@@ -1,6 +1,6 @@
 # kevinhojae fork: Markdown paste + annotations above embeddables
 
-Based on upstream `2.28.1` (`128a9ef4`). Keeps the upstream plugin id, so it
+Based on upstream `2.29.0`. Keeps the upstream plugin id, so it
 replaces the community build instead of running next to it.
 
 ## What it adds
