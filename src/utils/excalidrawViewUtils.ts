@@ -707,7 +707,7 @@ export async function fitEmbeddableHeightToContent(
     );
   // the note renders asynchronously, and a resize makes the reading view
   // render sections it had only estimated, so measure until it settles
-  let settledHeight = 0;
+  let settledCount = 0;
   for (let attempt = 0; attempt < 20; attempt++) {
     await sleep(100);
     const readingView = getReadingView();
@@ -727,13 +727,15 @@ export async function fitEmbeddableHeightToContent(
       ),
       FITTED_CARD_MAX_HEIGHT,
     );
-    if (Math.abs(height - element.height) < 1) {
-      if (settledHeight === height) {
+    // the estimate shifts by a few px with the card height; within the
+    // bottom space the note still fits, and resizing again would oscillate
+    if (Math.abs(height - element.height) <= FITTED_CARD_BOTTOM_SPACE) {
+      if (++settledCount === 2) {
         return;
       }
-      settledHeight = height;
       continue;
     }
+    settledCount = 0;
     const ea = getEA(view);
     ea.copyViewElementsToEAforEditing([element]);
     ea.getElement(id).height = height;
