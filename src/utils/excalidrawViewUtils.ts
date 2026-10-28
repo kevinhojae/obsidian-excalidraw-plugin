@@ -683,7 +683,7 @@ export async function pasteMarkdownAsEmbeddable(
 
 const FITTED_CARD_MIN_HEIGHT = 80;
 const FITTED_CARD_MAX_HEIGHT = 10000;
-const FITTED_CARD_BOTTOM_SPACE = 8;
+const FITTED_CARD_BOTTOM_SPACE = 24;
 
 /**
  * Sets the height of a just inserted Markdown embeddable to the height of its
@@ -708,6 +708,7 @@ export async function fitEmbeddableHeightToContent(
   // the note renders asynchronously, and a resize makes the reading view
   // render sections it had only estimated, so measure until it settles
   let settledCount = 0;
+  let fittedHeight = 0;
   for (let attempt = 0; attempt < 20; attempt++) {
     await sleep(100);
     const readingView = getReadingView();
@@ -727,18 +728,20 @@ export async function fitEmbeddableHeightToContent(
       ),
       FITTED_CARD_MAX_HEIGHT,
     );
-    // the estimate shifts by a few px with the card height; within the
-    // bottom space the note still fits, and resizing again would oscillate
-    if (Math.abs(height - element.height) <= FITTED_CARD_BOTTOM_SPACE) {
+    // the estimate shifts with the card height (a resize re-renders Mermaid
+    // diagrams), so following it both ways would oscillate. After the first
+    // fit the card only grows, and only past what the bottom space absorbs
+    if (fittedHeight && height - element.height <= FITTED_CARD_BOTTOM_SPACE) {
       if (++settledCount === 2) {
         return;
       }
       continue;
     }
     settledCount = 0;
+    fittedHeight = Math.max(height, fittedHeight);
     const ea = getEA(view);
     ea.copyViewElementsToEAforEditing([element]);
-    ea.getElement(id).height = height;
+    ea.getElement(id).height = fittedHeight;
     // part of the insertion, not an undo step of its own
     await ea.addElementsToView(
       false,
