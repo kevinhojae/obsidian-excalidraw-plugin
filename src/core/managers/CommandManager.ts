@@ -34,7 +34,7 @@ import { ImportSVGDialog } from "../../shared/Dialogs/ImportSVGDialog";
 import { InsertMDDialog } from "../../shared/Dialogs/InsertMDDialog";
 import { ExcalidrawAutomate } from "../../shared/ExcalidrawAutomate";
 import { search } from "src/utils/excalidrawAutomateUtils";
-import { templatePromt } from "../../shared/Dialogs/Prompt";
+import { selectDrawingTemplate } from "../../shared/Dialogs/TemplatePrompt";
 import { t } from "../../lang/helpers";
 import {
   createOrOverwriteFile,
@@ -571,6 +571,12 @@ export class CommandManager {
     });
 
     this.addCommand({
+      id: "insert-lucide-icon",
+      name: t("INSERT_LUCIDE_ICON"),
+      callback: () => { void this.plugin.lucidePicker.open(this.plugin.activeExcalidrawView); },
+    });
+
+    this.addCommand({
       id: "excalidraw-open",
       name: t("OPEN_EXISTING_NEW_PANE"),
       callback: () => {
@@ -675,6 +681,8 @@ export class CommandManager {
         activeView.file.basename,
         this.settings,
       );
+      const prepared = await this.plugin.prepareDrawing();
+      if (prepared.kind === "cancel") return;
       const folder = this.settings.embedUseExcalidrawFolder
         ? null
         : (
@@ -684,7 +692,7 @@ export class CommandManager {
               filename,
             )
           ).folder;
-      const file = await this.plugin.createDrawing(filename, folder);
+      const file = await this.plugin.createDrawing(filename, folder, prepared.data);
       await this.plugin.embedDrawing(file);
       this.plugin.openDrawing(file, location, true, undefined, true);
     };
@@ -2040,7 +2048,9 @@ export class CommandManager {
           let template: TFile;
           const templates = getListOfTemplateFiles(this.plugin);
           if (templates) {
-            template = await templatePromt(templates, this.app);
+            const selection = await selectDrawingTemplate(templates, this.app, normalizePath(this.settings.templateFilePath));
+            if (selection.kind === "cancel") { ea.destroy(); return; }
+            if (selection.kind === "template") template = selection.file;
           }
 
           const { folderpath, filename } = await getAnnotationFileNameAndFolder(
@@ -2568,8 +2578,10 @@ export class CommandManager {
         }
 
         void (async () => {
+          const prepared = await this.plugin.prepareDrawing();
+          if (prepared.kind === "cancel") return;
           await activeView.save();
-          const template = await this.plugin.getBlankDrawing();
+          const template = prepared.data;
           const target = await this.app.vault.read(activeFile);
           const mergedTarget = mergeMarkdownFiles(template, target);
           await createOrOverwriteFile(this.app, activeFile.path, mergedTarget);
