@@ -27,7 +27,8 @@ export const runClaude = (binaryPath: string, prompt: string, timeoutMs = 60000)
       }
     };
 
-    const child = spawn(binaryPath, ["-p", "--output-format", "json"], { shell: false });
+    // Pinned so the pairing model does not change with the user's Claude Code default.
+    const child = spawn(binaryPath, ["-p", "--model", "opus", "--output-format", "json"], { shell: false });
     const timer = setTimeout(() => {
       child.kill();
       done({ ok: false, reason: "timeout", detail: `${timeoutMs}ms` });
