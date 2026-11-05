@@ -186,7 +186,10 @@ package.json                          "test:annotation-export" 스크립트 (Tas
 
 **Files:** Create `src/view/annotationExport/probeAnchors.ts`
 
-(Task 0 결과 3줄을 여기 기록)
+**Task 0 스파이크 결과 (2026-11-05, 테스트 볼트 1209줄 md, embeddable 800×30000):**
+1. 캔버스 레이어가 embeddable 위를 덮어서 `caretRangeFromPoint`/`elementFromPoint`는 캔버스를 돌려준다. → 탐침은 hit-test가 아니라 **텍스트 노드의 `Range.getClientRects()`와 표시 band(화면 좌표)의 교차**로 한다.
+2. 문서 전체 높이로 펼친 embeddable은 reading view의 section이 전부 렌더링된다(605/605). 화면 밖 글자도 client rect가 계산된다. 가상화 위험은 없다. 단 embeddable이 **마운트돼 있어야** 하므로, 표시마다 화면으로 스크롤한 뒤 300ms 기다린다(800ms로 확인함).
+3. `view.getEmbeddableLeafElementById(id)`는 뷰를 다시 연 뒤 stale(`empty` 뷰, `containerEl` 미연결)일 수 있다. → 문서 DOM은 `view.contentEl.querySelectorAll(".markdown-preview-view")` 중 client rect가 doc의 화면 rect와 겹치는 것으로 찾는다. 화면 좌표 = `(scene + scroll) × zoom + offset(Left|Top)`.
 
 **Interfaces:**
 - Consumes: `DocRef`, `Mark`, Task 3 `Probe`
