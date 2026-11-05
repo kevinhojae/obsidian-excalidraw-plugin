@@ -1,11 +1,11 @@
 import type ExcalidrawView from "src/view/ExcalidrawView";
 import type { DocRef, Mark, Rect } from "src/utils/annotationExport/types";
-import type { Probe } from "src/utils/annotationExport/locateQuote";
+import { normalizeRenderedText, type Probe } from "src/utils/annotationExport/locateQuote";
 
-/** Time for an embeddable to mount after it scrolls into view (spike: 800ms was enough). */
-const MOUNT_WAIT_MS = 300;
+/** Time for an embeddable to mount after it scrolls into view; retried once with the spike-validated 800ms. */
+const MOUNT_WAIT_MS = [300, 800];
 
-type Char = { ch: string; node: Text; cx: number; cy: number; h: number };
+type Char = { ch: string; node: Text; offset: number; cx: number; cy: number; h: number };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -29,10 +29,20 @@ const charsIn = (root: Element, area: { left: number; top: number; right: number
       range.setEnd(n, i + 1);
       const r = range.getBoundingClientRect();
       if (r.width === 0 && r.height === 0) continue;
-      out.push({ ch: text[i], node: n, cx: r.left + r.width / 2, cy: r.top + r.height / 2, h: r.height });
+      out.push({ ch: text[i], node: n, offset: i, cx: r.left + r.width / 2, cy: r.top + r.height / 2, h: r.height });
     }
   }
   return out;
+};
+
+/** How far into the doc's rendered text a character sits, in the same normalized space locateQuote uses. */
+const textProgress = (root: Element, c: Char | undefined): number => {
+  if (!c) return 0;
+  const before = document.createRange();
+  before.setStart(root, 0);
+  before.setEnd(c.node, c.offset);
+  const total = normalizeRenderedText(root.textContent ?? "").length;
+  return total ? normalizeRenderedText(before.toString()).length / total : 0;
 };
 
 /** Join characters in document order, with a space between separate text nodes. */
@@ -102,12 +112,14 @@ export const probeMarks = async (
           scrollY: st.height / 2 - (mark.bbox.y + Math.min(mark.bbox.height, st.height / 2) / 2),
         },
       });
-      await sleep(MOUNT_WAIT_MS);
-
-      const root = docRoot(doc);
+      let root: Element | null = null;
+      for (const wait of MOUNT_WAIT_MS) {
+        await sleep(wait);
+        root = docRoot(doc);
+        if (root) break;
+      }
       if (!root) continue;
       const m = toScreen(mark.bbox);
-      const yRatio = (mark.bbox.y - doc.bbox.y) / doc.bbox.height;
       const docScreen = toScreen(doc.bbox);
 
       if (mark.kind === "underline") {
@@ -116,20 +128,20 @@ export const probeMarks = async (
           (c) => c.cx >= m.left && c.cx <= m.right && c.cy >= m.top - 1.1 * c.h && c.cy <= m.bottom + 0.35 * c.h,
         );
         const text = joinChars(chars);
-        if (text) result.set(mark.id, [{ text, yRatio }]);
+        if (text) result.set(mark.id, [{ text, progress: textProgress(root, chars[0]) }]);
       } else if (mark.kind === "box") {
         const chars = charsIn(root, m).filter((c) => c.cx >= m.left && c.cx <= m.right && c.cy >= m.top && c.cy <= m.bottom);
         const text = joinChars(chars);
-        if (text) result.set(mark.id, [{ text, yRatio }]);
+        if (text) result.set(mark.id, [{ text, progress: textProgress(root, chars[0]) }]);
       } else {
         // Range: the vertical line sits beside the text; use the full doc width over the line's height.
         const area = { left: docScreen.left, right: docScreen.right, top: m.top, bottom: m.bottom };
         const lines = visualLines(charsIn(root, area).filter((c) => c.cy >= m.top && c.cy <= m.bottom));
         if (lines.length > 0) {
-          const endRatio = (mark.bbox.y + mark.bbox.height - doc.bbox.y) / doc.bbox.height;
+          const last = lines[lines.length - 1];
           result.set(mark.id, [
-            { text: joinChars(lines[0]), yRatio },
-            { text: joinChars(lines[lines.length - 1]), yRatio: endRatio },
+            { text: joinChars(lines[0]), progress: textProgress(root, lines[0][0]) },
+            { text: joinChars(last), progress: textProgress(root, last[0]) },
           ]);
         }
       }

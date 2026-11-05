@@ -1,5 +1,8 @@
-/** Text read from the rendered document under a mark, and where the mark sits (0 = top, 1 = bottom). */
-export type Probe = { text: string; yRatio: number };
+/**
+ * Text read from the rendered document under a mark, and how far into the document's rendered text
+ * (whitespace and markdown symbols removed) that text starts: 0 = beginning, 1 = end.
+ */
+export type Probe = { text: string; progress: number };
 
 type LineRange = { lineStart: number; lineEnd: number };
 
@@ -17,7 +20,8 @@ const renderedChars = (line: string): string =>
     .replace(/<[^>]+>/g, "")
     .replace(SYMBOLS, "");
 
-const normalizeProbe = (text: string): string => text.replace(SYMBOLS, "");
+/** Rendered text with whitespace and markdown-ish symbols removed; the coordinate space of Probe.progress. */
+export const normalizeRenderedText = (text: string): string => text.replace(SYMBOLS, "");
 
 /** Map each source line to the block it belongs to (tables and code fences expand to the whole block). */
 const blockRanges = (lines: string[]): LineRange[] => {
@@ -47,12 +51,12 @@ const frontmatterEnd = (lines: string[]): number => {
   return close < 0 ? 0 : close + 1;
 };
 
-/** Find the source lines a probe's text came from. Among repeats, the one closest to yRatio wins. */
+/** Find the source lines a probe's text came from. Among repeats, the one closest to progress wins. */
 export const locateQuote = (
   source: string,
   probe: Probe,
 ): { lineStart: number; lineEnd: number; quote: string | null } | null => {
-  const needle = normalizeProbe(probe.text);
+  const needle = normalizeRenderedText(probe.text);
   if (!needle) return null;
 
   const lines = source.split("\n");
@@ -72,7 +76,7 @@ export const locateQuote = (
   for (let at = stream.indexOf(needle); at >= 0; at = stream.indexOf(needle, at + 1)) {
     const start = lineOfChar[at];
     const end = lineOfChar[at + needle.length - 1];
-    const dist = Math.abs(start / Math.max(lines.length - 1, 1) - probe.yRatio);
+    const dist = Math.abs(at / Math.max(stream.length, 1) - probe.progress);
     if (!best || dist < best.dist) best = { start, end, dist };
   }
   if (!best) return null;

@@ -51,8 +51,8 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
     const doc = docs.find((d) => d.elementId === mark.docId);
     const source = sources.get(mark.docId) ?? "";
     const ps = probes.get(mark.id) ?? [];
-    const yRatio = (mark.bbox.y - doc.bbox.y) / doc.bbox.height;
-    const approxLine = Math.max(1, Math.round(yRatio * source.split("\n").length));
+    const sceneRatio = (mark.bbox.y - doc.bbox.y) / doc.bbox.height;
+    const approxLine = Math.max(1, Math.round(sceneRatio * source.split("\n").length));
     let found: { lineStart: number; lineEnd: number; quote: string | null } | null = null;
     if (mark.kind === "range") {
       const range = locateLineRange(source, ps);
@@ -68,7 +68,7 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
     });
   }
 
-  const progress = new Notice("AI가 코멘트를 묶는 중…", 0);
+  const working = new Notice("AI가 코멘트를 묶는 중…", 0);
   let pairings: Pairing[] | null = null;
   let fallbackReason = "";
   try {
@@ -85,7 +85,7 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
       if (!pairings) fallbackReason = "AI 응답 형식이 맞지 않음";
     }
   } finally {
-    progress.hide();
+    working.hide();
   }
   const usedFallback = !pairings;
   if (usedFallback) pairings = nearestPairing(anchors, comments);
@@ -104,7 +104,14 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
     return toFeedbackItems([p], anchors, comments, absolute(nearestDoc(comment.bbox).filePath));
   });
 
-  await navigator.clipboard.writeText(formatAnnotations(items));
+  // Electron's clipboard has no focus requirement; navigator.clipboard fails if the user switched apps during the AI wait.
+  const electron = (window as unknown as { require?: (id: string) => { clipboard?: { writeText(t: string): void } } }).require?.("electron");
+  const text = formatAnnotations(items);
+  if (electron?.clipboard) electron.clipboard.writeText(text);
+  else await navigator.clipboard.writeText(text);
+
+  const unread = items.filter((i) => i.lineStart !== undefined && i.quote === null).length;
+  const unreadNote = unread ? `\n${unread}개는 표시 아래 원문을 읽지 못해 줄 번호가 근사치예요.` : "";
   const fallbackNote = usedFallback ? `\n${fallbackReason} → 가까운 표시 규칙으로 묶었어요.` : "";
-  new Notice(`${items.length}개 코멘트를 복사했어요.${fallbackNote}${skippedNote}`, 8000);
+  new Notice(`${items.length}개 코멘트를 복사했어요.${unreadNote}${fallbackNote}${skippedNote}`, 8000);
 };

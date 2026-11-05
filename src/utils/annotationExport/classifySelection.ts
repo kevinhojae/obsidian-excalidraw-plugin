@@ -15,18 +15,29 @@ export type ExcalidrawElementLike = {
   startBinding?: { elementId: string } | null;
   endBinding?: { elementId: string } | null;
   isDeleted?: boolean;
+  /** Linear elements: points relative to x,y (x,y is the first point, others may be negative). */
+  points?: readonly (readonly [number, number])[];
 };
 
 /** A vertical range line may sit this far outside the doc's left/right edge. */
 const RANGE_MARGIN = 120;
 const UNDERLINE_MAX_HEIGHT = 8;
 
-const bboxOf = (e: ExcalidrawElementLike): Rect => ({
-  x: Math.min(e.x, e.x + e.width),
-  y: Math.min(e.y, e.y + e.height),
-  width: Math.abs(e.width),
-  height: Math.abs(e.height),
-});
+const bboxOf = (e: ExcalidrawElementLike): Rect => {
+  if (e.points?.length) {
+    const xs = e.points.map((p) => e.x + p[0]);
+    const ys = e.points.map((p) => e.y + p[1]);
+    const x = Math.min(...xs);
+    const y = Math.min(...ys);
+    return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+  }
+  return {
+    x: Math.min(e.x, e.x + e.width),
+    y: Math.min(e.y, e.y + e.height),
+    width: Math.abs(e.width),
+    height: Math.abs(e.height),
+  };
+};
 
 const overlaps = (a: Rect, b: Rect, margin = 0): boolean =>
   a.x <= b.x + b.width + margin &&

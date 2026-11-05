@@ -122,3 +122,12 @@ test("sticky selected without its text still finds the text in all elements", ()
   // Assert
   assert.deepEqual(r.comments.map((c) => c.text), ["c"]);
 });
+
+test("line drawn bottom-to-top uses its points for the bbox", () => {
+  // Arrange: Excalidraw keeps x,y at the first point; later points can be negative.
+  const up = { id: "v", type: "line", x: 820, y: 900, width: 0, height: 400, points: [[0, 0], [0, -400]] };
+  // Act
+  const r = run([doc("d1"), up]);
+  // Assert
+  assert.deepEqual(r.marks, [{ id: "v", docId: "d1", kind: "range", bbox: { x: 820, y: 500, width: 0, height: 400 } }]);
+});
