@@ -259,6 +259,8 @@ export interface ExcalidrawSettings {
   showSplashscreen: boolean;
   pdfSettings: PDFExportSettings;
   disableContextMenu: boolean;
+  /** Absolute path to the claude CLI used by "Copy canvas annotations as feedback". Empty = ~/.local/bin/claude */
+  annotationExportClaudePath: string;
 }
 
 const KNOWN_AI_IMAGE_MODEL_CAPABILITIES: Record<
@@ -1033,4 +1035,5 @@ export const DEFAULT_SETTINGS: ExcalidrawSettings = {
     margin: "normal",
   },
   disableContextMenu: false,
+  annotationExportClaudePath: "",
 };
