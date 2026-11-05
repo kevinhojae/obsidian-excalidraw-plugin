@@ -109,8 +109,8 @@ export const classifySelection = (
       continue;
     }
     if (e.type === "text") {
-      const insideDoc = docs.some((d) => contains(d.bbox, center(box)));
-      if (!e.containerId && !insideDoc) {
+      // Doc body text lives in the embeddable's DOM, so every canvas text element is a reviewer comment.
+      if (!e.containerId) {
         comments.push({ id: e.id, text: e.originalText ?? e.text ?? "", bbox: box, arrowToIds: [] });
       }
       continue;
