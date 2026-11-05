@@ -4,382 +4,392 @@
     {
       "name": "show-cli-instructions",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 146
+      "line": 150
     },
     {
       "name": "excalidraw-convert-image-from-url-to-local-file",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 261
+      "line": 265
+    },
+    {
+      "name": "excalidraw-paste-markdown-embeddable",
+      "path": "src/core/managers/CommandManager.ts",
+      "line": 284
+    },
+    {
+      "name": "excalidraw-export-canvas-annotations",
+      "path": "src/core/managers/CommandManager.ts",
+      "line": 304
     },
     {
       "name": "excalidraw-unzip-file",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 280
+      "line": 322
     },
     {
       "name": "excalidraw-publish-svg-check",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 330
+      "line": 372
     },
     {
       "name": "excalidraw-embeddable-poroperties",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 345
+      "line": 387
     },
     {
       "name": "excalidraw-embeddables-relative-scale",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 387
+      "line": 429
     },
     {
       "name": "open-image-excalidraw-source",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 422
+      "line": 464
     },
     {
       "name": "excalidraw-disable-autosave",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 491
+      "line": 533
     },
     {
       "name": "excalidraw-enable-autosave",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 506
+      "line": 548
     },
     {
       "name": "excalidraw-toggle-session-view-mode",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 521
+      "line": 563
     },
     {
       "name": "excalidraw-download-lib",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 537
+      "line": 579
     },
     {
       "name": "excalidraw-open-sidepanel",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 543
+      "line": 585
     },
     {
       "name": "insert-lucide-icon",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 551
+      "line": 593
     },
     {
       "name": "excalidraw-open",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 557
+      "line": 599
     },
     {
       "name": "excalidraw-open-on-current",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 565
+      "line": 607
     },
     {
       "name": "excalidraw-insert-transclusion",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 573
+      "line": 615
     },
     {
       "name": "excalidraw-insert-last-active-transclusion",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 585
+      "line": 627
     },
     {
       "name": "excalidraw-autocreate",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 606
+      "line": 648
     },
     {
       "name": "excalidraw-autocreate-newtab",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 617
+      "line": 659
     },
     {
       "name": "excalidraw-autocreate-on-current",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 628
+      "line": 670
     },
     {
       "name": "excalidraw-autocreate-popout",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 639
+      "line": 681
     },
     {
       "name": "excalidraw-autocreate-and-embed",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 678
+      "line": 720
     },
     {
       "name": "excalidraw-autocreate-and-embed-new-tab",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 690
+      "line": 732
     },
     {
       "name": "excalidraw-autocreate-and-embed-on-current",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 702
+      "line": 744
     },
     {
       "name": "excalidraw-autocreate-and-embed-popout",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 714
+      "line": 756
     },
     {
       "name": "run-ocr",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 729
+      "line": 771
     },
     {
       "name": "rerun-ocr",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 749
+      "line": 791
     },
     {
       "name": "run-ocr-selectedelements",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 769
+      "line": 811
     },
     {
       "name": "search-text",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 793
+      "line": 835
     },
     {
       "name": "fullscreen",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 811
+      "line": 853
     },
     {
       "name": "disable-binding",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 833
+      "line": 875
     },
     {
       "name": "disable-framerendering",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 851
+      "line": 893
     },
     {
       "name": "frame-settings",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 869
+      "line": 911
     },
     {
       "name": "copy-link-to-drawing",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 887
+      "line": 929
     },
     {
       "name": "disable-frameclipping",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 905
+      "line": 947
     },
     {
       "name": "export-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 923
+      "line": 965
     },
     {
       "name": "save",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 944
+      "line": 986
     },
     {
       "name": "toggle-lock",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 957
+      "line": 999
     },
     {
       "name": "scriptengine-store",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 978
+      "line": 1020
     },
     {
       "name": "delete-file",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 992
+      "line": 1034
     },
     {
       "name": "convert-text2MD",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1023
+      "line": 1065
     },
     {
       "name": "insert-link",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1054
+      "line": 1096
     },
     {
       "name": "insert-cmd",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1077
+      "line": 1119
     },
     {
       "name": "insert-link-to-element",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1099
+      "line": 1141
     },
     {
       "name": "insert-link-to-element-group",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1117
+      "line": 1159
     },
     {
       "name": "insert-link-to-element-frame",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1135
+      "line": 1177
     },
     {
       "name": "insert-link-to-element-frame-clipped",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1153
+      "line": 1195
     },
     {
       "name": "insert-link-to-element-area",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1171
+      "line": 1213
     },
     {
       "name": "toggle-lefthanded-mode",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1189
+      "line": 1231
     },
     {
       "name": "toggle-enable-context-menu",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1218
+      "line": 1260
     },
     {
       "name": "flip-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1233
+      "line": 1275
     },
     {
       "name": "duplicate-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1293
+      "line": 1335
     },
     {
       "name": "reset-image-to-100",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1358
+      "line": 1400
     },
     {
       "name": "reset-image-ar",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1413
+      "line": 1455
     },
     {
       "name": "open-link-props",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1456
+      "line": 1498
     },
     {
       "name": "convert-card-to-file",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1499
+      "line": 1541
     },
     {
       "name": "insert-active-pdfpage",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1536
+      "line": 1578
     },
     {
       "name": "crop-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1602
+      "line": 1644
     },
     {
       "name": "annotate-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 1937
+      "line": 1979
     },
     {
       "name": "insert-editable-markdown-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2233
+      "line": 2275
     },
     {
       "name": "edit-selected-markdown-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2248
+      "line": 2290
     },
     {
       "name": "refresh-scene-images",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2271
+      "line": 2313
     },
     {
       "name": "insert-image",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2297
+      "line": 2339
     },
     {
       "name": "import-svg",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2315
+      "line": 2357
     },
     {
       "name": "release-notes",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2333
+      "line": 2375
     },
     {
       "name": "view-autostart-scripts",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2347
+      "line": 2389
     },
     {
       "name": "tray-mode",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2355
+      "line": 2397
     },
     {
       "name": "insert-md",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2380
+      "line": 2422
     },
     {
       "name": "insert-pdf",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2398
+      "line": 2440
     },
     {
       "name": "insert-pdf",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2417
+      "line": 2459
     },
     {
       "name": "universal-add-file",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2448
+      "line": 2490
     },
     {
       "name": "universal-card",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2470
+      "line": 2512
     },
     {
       "name": "insert-LaTeX-symbol",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2488
+      "line": 2530
     },
     {
       "name": "toggle-excalidraw-view",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2506
+      "line": 2548
     },
     {
       "name": "convert-to-excalidraw",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2539
+      "line": 2581
     },
     {
       "name": "convert-excalidraw",
       "path": "src/core/managers/CommandManager.ts",
-      "line": 2571
+      "line": 2613
     }
   ],
   "publicEA": [
@@ -2134,6 +2144,11 @@
       "name": "disableContextMenu",
       "path": "src/core/settingsDefaults.ts",
       "line": 261
+    },
+    {
+      "name": "annotationExportClaudePath",
+      "path": "src/core/settingsDefaults.ts",
+      "line": 263
     }
   ],
   "frontmatter": [
@@ -2460,6 +2475,10 @@
       "mode": "isolated-or-extracted"
     },
     {
+      "path": "scripts/testing/host/acknowledgedCLI.test.mjs",
+      "mode": "isolated-or-extracted"
+    },
+    {
       "path": "scripts/testing/host/behaviorDecoding.test.mjs",
       "mode": "isolated-or-extracted"
     },
@@ -2657,6 +2676,22 @@
     },
     {
       "path": "scripts/testing/windowTimers.source.test.mjs",
+      "mode": "direct-module-or-tooling"
+    },
+    {
+      "path": "tests/annotationExportClassify.test.mjs",
+      "mode": "direct-module-or-tooling"
+    },
+    {
+      "path": "tests/annotationExportFormat.test.mjs",
+      "mode": "direct-module-or-tooling"
+    },
+    {
+      "path": "tests/annotationExportLocate.test.mjs",
+      "mode": "direct-module-or-tooling"
+    },
+    {
+      "path": "tests/annotationExportPairing.test.mjs",
       "mode": "direct-module-or-tooling"
     },
     {

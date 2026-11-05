@@ -1,3 +1,4 @@
+import { exportAnnotations } from "src/view/annotationExport/exportAnnotations";
 import {
   TFile,
   App,
@@ -296,6 +297,24 @@ export class CommandManager {
             await navigator.clipboard?.readText(),
           );
         })();
+      },
+    });
+
+    this.addCommand({
+      id: "excalidraw-export-canvas-annotations",
+      name: t("EXPORT_CANVAS_ANNOTATIONS"),
+      checkCallback: (checking: boolean) => {
+        const view = this.app.workspace.getActiveViewOfType(ExcalidrawView);
+        if (!view?.excalidrawAPI) {
+          return false;
+        }
+        if (checking) {
+          return true;
+        }
+        exportAnnotations(view).catch((e) => {
+          console.error(e);
+          new Notice(`Copy canvas annotations failed: ${e?.message ?? e}`);
+        });
       },
     });
 

@@ -65,6 +65,19 @@ test("fallback pairs each comment to nearest anchor", () => {
   ]);
 });
 
+test("fallback pairs a margin comment at the same height even when far horizontally", () => {
+  // Arrange
+  const anchors = [anchor("A1", 100), anchor("A2", 1000)];
+  const comments = [comment("margin", 900, 60), comment("corner", 1500, -400)];
+  // Act
+  const r = nearestPairing(anchors, comments);
+  // Assert
+  assert.deepEqual(r, [
+    { commentId: "margin", anchorIds: ["A1"] },
+    { commentId: "corner", anchorIds: [] },
+  ]);
+});
+
 test("fallback respects arrows", () => {
   // Arrange
   const anchors = [anchor("A1", 100), anchor("A2", 1000)];

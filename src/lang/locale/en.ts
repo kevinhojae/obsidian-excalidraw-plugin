@@ -291,6 +291,7 @@ export default {
   ERROR_TRY_AGAIN: "Please try again.",
   PASTE_CODEBLOCK: "Paste code block",
   PASTE_MARKDOWN_EMBEDDABLE: "Paste Markdown as embeddable",
+  EXPORT_CANVAS_ANNOTATIONS: "Copy canvas annotations as feedback",
   PASTE_MARKDOWN_EMPTY: "The clipboard has no text to paste.",
   PASTE_MARKDOWN_INSERT_FAILED:
     "The Markdown was saved but could not be added to the drawing. Saved to:",

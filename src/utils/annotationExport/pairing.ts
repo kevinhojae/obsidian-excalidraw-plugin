@@ -71,10 +71,13 @@ export const parsePairingResponse = (raw: string, anchors: Anchor[], comments: C
   }
 };
 
+/** Horizontal gaps count a quarter: comments usually sit in the margin beside the passage, at the same height. */
+const HORIZONTAL_WEIGHT = 0.25;
+
 const rectDistance = (a: Rect, b: Rect): number => {
   const dx = Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0);
   const dy = Math.max(a.y - (b.y + b.height), b.y - (a.y + a.height), 0);
-  return Math.hypot(dx, dy);
+  return dy + HORIZONTAL_WEIGHT * dx;
 };
 
 /** Rule-based pairing used when the AI step fails: arrows first, else the nearest anchor within NEAR_LIMIT. */
