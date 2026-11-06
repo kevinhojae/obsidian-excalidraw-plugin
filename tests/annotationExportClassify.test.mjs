@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { classifySelection } from "../src/utils/annotationExport/classifySelection.ts";
+import { classifySelection, expandSelection } from "../src/utils/annotationExport/classifySelection.ts";
 
 const resolveLink = (link) => {
   const m = link.match(/^\[\[([^\]#|]+\.md)\]\]$/);
@@ -129,4 +129,54 @@ test("line drawn bottom-to-top uses its points for the bbox", () => {
   const r = run([doc("d1"), up]);
   // Assert
   assert.deepEqual(r.marks, [{ id: "v", docId: "d1", kind: "range", bbox: { x: 820, y: 500, width: 0, height: 400 } }]);
+});
+
+test("selecting only a doc pulls in marks and comments in its margins", () => {
+  // Arrange
+  const d = doc("d1");
+  const u = line("u", 10, 100, 300, 0);
+  const sticky = { id: "s", type: "stickynote", x: 1200, y: 80, width: 250, height: 120 };
+  const text = { id: "t", type: "text", x: 1210, y: 90, width: 100, height: 25, text: "c", containerId: "s" };
+  const range = line("v", -80, 300, 0, 200);
+  const farRight = { id: "far", type: "text", x: 1500, y: 100, width: 100, height: 25, text: "x" };
+  const below = { id: "below", type: "text", x: 900, y: 2500, width: 100, height: 25, text: "x" };
+  const all = [d, u, sticky, text, range, farRight, below];
+  // Act
+  const ids = expandSelection([d], all).map((e) => e.id).sort();
+  // Assert
+  assert.deepEqual(ids, ["d1", "s", "t", "u", "v"]);
+});
+
+test("auto-include skips elements centered inside another doc", () => {
+  // Arrange
+  const d1 = doc("d1");
+  const d2 = { ...doc("d2", "[[b.md]]"), x: 1000 };
+  const onD2 = line("u2", 1100, 100, 300, 0);
+  // Act
+  const ids = expandSelection([d1], [d1, d2, onD2]).map((e) => e.id).sort();
+  // Assert
+  assert.deepEqual(ids, ["d1"]);
+});
+
+test("auto-include follows arrows from far comments to included marks", () => {
+  // Arrange
+  const d = doc("d1");
+  const u = line("u", 10, 100, 300, 0);
+  const sticky = { id: "s", type: "stickynote", x: 3000, y: 3000, width: 250, height: 120 };
+  const text = { id: "t", type: "text", x: 3010, y: 3010, width: 100, height: 25, text: "c", containerId: "s" };
+  const arrow = { id: "a", type: "arrow", x: 3000, y: 3000, width: 10, height: 10, startBinding: { elementId: "s" }, endBinding: { elementId: "u" } };
+  // Act
+  const ids = expandSelection([d], [d, u, sticky, text, arrow]).map((e) => e.id).sort();
+  // Assert
+  assert.deepEqual(ids, ["a", "d1", "s", "t", "u"]);
+});
+
+test("explicitly selected elements are kept even outside the margins", () => {
+  // Arrange
+  const d = doc("d1");
+  const far = { id: "far", type: "text", x: 5000, y: 5000, width: 100, height: 25, text: "x" };
+  // Act
+  const ids = expandSelection([d, far], [d, far]).map((e) => e.id).sort();
+  // Assert
+  assert.deepEqual(ids, ["d1", "far"]);
 });

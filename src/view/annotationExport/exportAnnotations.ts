@@ -1,6 +1,6 @@
 import { Notice, TFile } from "obsidian";
 import type ExcalidrawView from "src/view/ExcalidrawView";
-import { classifySelection, type ExcalidrawElementLike } from "src/utils/annotationExport/classifySelection";
+import { classifySelection, expandSelection, type ExcalidrawElementLike } from "src/utils/annotationExport/classifySelection";
 import { formatAnnotations } from "src/utils/annotationExport/formatAnnotations";
 import { locateLineRange, locateQuote } from "src/utils/annotationExport/locateQuote";
 import {
@@ -20,7 +20,8 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
   const api = view.excalidrawAPI;
   const app = view.app;
   const all = api.getSceneElements() as unknown as ExcalidrawElementLike[];
-  const selected = view.getViewSelectedElements() as unknown as ExcalidrawElementLike[];
+  // Selecting just a doc (or its frame) is enough: nearby marks and comments are pulled in.
+  const selected = expandSelection(view.getViewSelectedElements() as unknown as ExcalidrawElementLike[], all);
 
   const resolveLink = (link: string): string | null => {
     const m = /^\[\[([^\]|]+?)(?:\|[^\]]*)?\]\]$/.exec(link);

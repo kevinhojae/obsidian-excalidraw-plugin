@@ -140,3 +140,49 @@ export const classifySelection = (
 
   return { docs, marks, comments, skippedLinks };
 };
+
+/** Comments usually sit in the right margin; range lines just left of the text. */
+const AUTO_INCLUDE_RIGHT = 600;
+const AUTO_INCLUDE_LEFT = RANGE_MARGIN;
+
+/**
+ * Grow a selection so that selecting just a doc (or a frame holding it) also takes the marks and comments
+ * around it: anything centered within the doc's height and its margins, plus comments joined by arrows.
+ */
+export const expandSelection = (
+  selected: readonly ExcalidrawElementLike[],
+  all: readonly ExcalidrawElementLike[],
+): ExcalidrawElementLike[] => {
+  const live = all.filter((e) => !e.isDeleted && e.type !== "frame");
+  const embeddables = live.filter((e) => e.type === "embeddable");
+  const docs = selected.filter((e) => e.type === "embeddable" && e.link?.startsWith("[["));
+  const picked = new Map(selected.map((e) => [e.id, e]));
+  const add = (e: ExcalidrawElementLike | undefined) => e && picked.set(e.id, e);
+
+  for (const d of docs) {
+    const box = bboxOf(d);
+    const zone = { x: box.x - AUTO_INCLUDE_LEFT, y: box.y, width: box.width + AUTO_INCLUDE_LEFT + AUTO_INCLUDE_RIGHT, height: box.height };
+    for (const e of live) {
+      if (e.type === "embeddable" || e.containerId) continue;
+      const c = center(bboxOf(e));
+      const inOtherDoc = embeddables.some((o) => o.id !== d.id && contains(bboxOf(o), c));
+      if (contains(zone, c) && !inOtherDoc) add(e);
+    }
+  }
+
+  // Arrows that touch a picked element bring the element on their other end.
+  for (const e of live) {
+    if (e.type !== "arrow") continue;
+    const ends = [e.startBinding?.elementId, e.endBinding?.elementId];
+    if (ends.some((id) => id && picked.has(id) && picked.get(id).type !== "embeddable")) {
+      add(e);
+      for (const id of ends) add(live.find((x) => x.id === id && x.type !== "embeddable"));
+    }
+  }
+
+  // Containers bring their bound text.
+  for (const e of live) {
+    if (e.containerId && picked.has(e.containerId)) add(e);
+  }
+  return [...picked.values()];
+};
