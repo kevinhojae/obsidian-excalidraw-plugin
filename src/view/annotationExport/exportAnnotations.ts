@@ -7,6 +7,7 @@ import {
   buildPairingPrompt,
   nearestPairing,
   parsePairingResponse,
+  positionMarks,
   toFeedbackItems,
 } from "src/utils/annotationExport/pairing";
 import type { Anchor, DocRef, Pairing, Rect } from "src/utils/annotationExport/types";
@@ -45,10 +46,12 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
     if (file instanceof TFile) sources.set(d.elementId, await app.vault.cachedRead(file));
   }
 
-  const probes = await probeMarks(view, docs, marks);
+  // Comments with no mark nearby still point at the text they were written next to.
+  const allMarks = [...marks, ...positionMarks(docs, marks, comments)];
+  const probes = await probeMarks(view, docs, allMarks);
 
   const anchors: Anchor[] = [];
-  for (const mark of marks) {
+  for (const mark of allMarks) {
     const doc = docs.find((d) => d.elementId === mark.docId);
     const source = sources.get(mark.docId) ?? "";
     const ps = probes.get(mark.id) ?? [];
@@ -65,6 +68,7 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
       id: mark.id,
       filePath: absolute(doc.filePath),
       bbox: mark.bbox,
+      ...(mark.kind === "position" ? { positionOf: mark.id.slice("pos:".length) } : {}),
       ...(found ?? { lineStart: approxLine, lineEnd: approxLine, quote: null }),
     });
   }

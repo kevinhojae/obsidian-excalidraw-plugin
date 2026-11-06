@@ -4,6 +4,7 @@ import {
   buildPairingPrompt,
   nearestPairing,
   parsePairingResponse,
+  positionMarks,
   toFeedbackItems,
 } from "../src/utils/annotationExport/pairing.ts";
 
@@ -125,4 +126,47 @@ test("merged quote is null when any anchor quote is unknown", () => {
   const items = toFeedbackItems([{ commentId: "C1", anchorIds: ["A1", "A2"] }], anchors, comments, "/a.md");
   // Assert
   assert.equal(items[0].quote, null);
+});
+
+const docRef = { elementId: "d1", filePath: "a.md", bbox: { x: 0, y: 0, width: 800, height: 3000 } };
+const mark = (id, y) => ({ id, docId: "d1", kind: "underline", bbox: { x: 10, y, width: 300, height: 0 } });
+
+test("comment with no mark nearby gets a position mark at its own place", () => {
+  // Arrange: one comment on the doc far from any mark, one beside a mark, one far off the doc.
+  const lone = comment("lone", 200, 1500);
+  const near = comment("near", 900, 120);
+  const off = comment("off", 5000, 1500);
+  // Act
+  const r = positionMarks([docRef], [mark("u", 100)], [lone, near, off]);
+  // Assert
+  assert.deepEqual(r, [{ id: "pos:lone", docId: "d1", kind: "position", bbox: lone.bbox }]);
+});
+
+test("comment with an arrow gets no position mark", () => {
+  // Arrange
+  const c = comment("c", 200, 1500, { arrowToIds: ["u"] });
+  // Act
+  const r = positionMarks([docRef], [mark("u", 100)], [c]);
+  // Assert
+  assert.deepEqual(r, []);
+});
+
+test("fallback uses a position anchor only for its own comment", () => {
+  // Arrange
+  const pos = anchor("pos:C1", 1500, { positionOf: "C1" });
+  const c1 = comment("C1", 200, 1500);
+  const c2 = comment("C2", 200, 1550);
+  // Act
+  const r = nearestPairing([pos], [c1, c2]);
+  // Assert
+  assert.deepEqual(r, [{ commentId: "C1", anchorIds: ["pos:C1"] }, { commentId: "C2", anchorIds: [] }]);
+});
+
+test("prompt marks position anchors with their comment", () => {
+  // Arrange
+  const pos = anchor("pos:C1", 1500, { positionOf: "C1" });
+  // Act
+  const p = buildPairingPrompt([pos], [comment("C1", 200, 1500)]);
+  // Assert
+  assert.ok(p.includes('"positionOf": "C1"'));
 });

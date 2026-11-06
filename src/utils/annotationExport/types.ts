@@ -3,7 +3,8 @@ export type Rect = { x: number; y: number; width: number; height: number };
 /** md embeddable on the canvas. filePath is absolute. */
 export type DocRef = { elementId: string; filePath: string; bbox: Rect };
 
-export type MarkKind = "underline" | "box" | "range";
+/** "position": no mark was drawn; the passage at a comment's own place stands in for one. */
+export type MarkKind = "underline" | "box" | "range" | "position";
 
 /** A red mark drawn over a document. */
 export type Mark = { id: string; docId: string; kind: MarkKind; bbox: Rect };
@@ -16,6 +17,8 @@ export type Anchor = {
   lineEnd: number;
   quote: string | null;
   bbox: Rect;
+  /** Set on a position anchor: the comment whose own place it reads. */
+  positionOf?: string;
 };
 
 export type Comment = { id: string; text: string; bbox: Rect; arrowToIds: string[] };

@@ -1,4 +1,4 @@
-import type { Anchor, Comment, FeedbackItem, Pairing, Rect } from "./types";
+import type { Anchor, Comment, DocRef, FeedbackItem, Mark, Pairing, Rect } from "./types";
 
 /** Beyond this distance (scene px) the fallback treats a comment as general feedback. */
 const NEAR_LIMIT = 400;
@@ -9,7 +9,10 @@ const round = (r: Rect) => ({
 
 export const buildPairingPrompt = (anchors: Anchor[], comments: Comment[]): string => {
   const input = {
-    anchors: anchors.map((a) => ({ id: a.id, lines: [a.lineStart, a.lineEnd], quote: a.quote, bbox: round(a.bbox) })),
+    anchors: anchors.map((a) => ({
+      id: a.id, lines: [a.lineStart, a.lineEnd], quote: a.quote, bbox: round(a.bbox),
+      ...(a.positionOf ? { positionOf: a.positionOf } : {}),
+    })),
     comments: comments.map((c) => ({ id: c.id, text: c.text, bbox: round(c.bbox), arrowTo: c.arrowToIds })),
   };
   return [
@@ -21,6 +24,8 @@ export const buildPairingPrompt = (anchors: Anchor[], comments: Comment[]): stri
     "- If a comment has arrowTo ids, use exactly those anchors.",
     "- Otherwise use position (comments usually sit beside the passage, often to the right at a similar height)",
     "  and meaning (the comment text usually asks about or reacts to the quote).",
+    "- An anchor with positionOf was not marked: it is the passage at that comment's own place. Use it only for",
+    "  that comment, and only when the comment is about that passage rather than the whole document.",
     "- A comment may refer to several anchors. A comment that is about the document as a whole gets [].",
     "- Anchors that no comment refers to are simply left out.",
     "- Every comment id must appear exactly once. Use only ids from the input.",
@@ -86,10 +91,30 @@ export const nearestPairing = (anchors: Anchor[], comments: Comment[]): Pairing[
     if (c.arrowToIds.length > 0) return { commentId: c.id, anchorIds: [...c.arrowToIds] };
     let best: { id: string; d: number } | null = null;
     for (const a of anchors) {
+      if (a.positionOf && a.positionOf !== c.id) continue;
       const d = rectDistance(a.bbox, c.bbox);
       if (d <= NEAR_LIMIT && (!best || d < best.d)) best = { id: a.id, d };
     }
     return { commentId: c.id, anchorIds: best ? [best.id] : [] };
+  });
+
+/** A comment this far beside a doc (scene px) still reads as written next to that doc's text. */
+const BESIDE_DOC = 600;
+
+/**
+ * Comments with no arrow and no mark within NEAR_LIMIT, written on or beside a doc, get a "position" mark
+ * at their own place, so the passage they sit next to can still be quoted.
+ */
+export const positionMarks = (docs: DocRef[], marks: Mark[], comments: Comment[]): Mark[] =>
+  comments.flatMap((c) => {
+    if (c.arrowToIds.length > 0 || marks.some((m) => rectDistance(m.bbox, c.bbox) <= NEAR_LIMIT)) return [];
+    const cx = c.bbox.x + c.bbox.width / 2;
+    const cy = c.bbox.y + c.bbox.height / 2;
+    const doc = docs.find(
+      (d) => cy >= d.bbox.y && cy <= d.bbox.y + d.bbox.height &&
+        cx >= d.bbox.x - BESIDE_DOC && cx <= d.bbox.x + d.bbox.width + BESIDE_DOC,
+    );
+    return doc ? [{ id: `pos:${c.id}`, docId: doc.elementId, kind: "position" as const, bbox: c.bbox }] : [];
   });
 
 /** Build output items. Quotes and line numbers always come from anchors, never from the AI. */

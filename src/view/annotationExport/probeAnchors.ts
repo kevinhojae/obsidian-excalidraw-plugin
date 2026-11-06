@@ -133,6 +133,12 @@ export const probeMarks = async (
         const chars = charsIn(root, m).filter((c) => c.cx >= m.left && c.cx <= m.right && c.cy >= m.top && c.cy <= m.bottom);
         const text = joinChars(chars);
         if (text) result.set(mark.id, [{ text, progress: textProgress(root, chars[0]) }]);
+      } else if (mark.kind === "position") {
+        // A comment written on or beside the text: take the doc line nearest the comment's top edge.
+        const area = { left: docScreen.left, right: docScreen.right, top: m.top - 40, bottom: m.bottom };
+        const lines = visualLines(charsIn(root, area).filter((c) => c.cy >= area.top && c.cy <= area.bottom));
+        const line = lines.sort((a, b) => Math.abs(a[0].cy - m.top) - Math.abs(b[0].cy - m.top))[0];
+        if (line) result.set(mark.id, [{ text: joinChars(line), progress: textProgress(root, line[0]) }]);
       } else {
         // Range: the vertical line sits beside the text; use the full doc width over the line's height.
         const area = { left: docScreen.left, right: docScreen.right, top: m.top, bottom: m.bottom };
