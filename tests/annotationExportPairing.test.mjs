@@ -129,24 +129,35 @@ test("merged quote is null when any anchor quote is unknown", () => {
 });
 
 const docRef = { elementId: "d1", filePath: "a.md", bbox: { x: 0, y: 0, width: 800, height: 3000 } };
-const mark = (id, y) => ({ id, docId: "d1", kind: "underline", bbox: { x: 10, y, width: 300, height: 0 } });
 
-test("comment with no mark nearby gets a position mark at its own place", () => {
-  // Arrange: one comment on the doc far from any mark, one beside a mark, one far off the doc.
+test("every arrowless comment on or beside a doc gets a position mark, even next to a mark", () => {
+  // Arrange: one comment far from marks, one 250px below an unrelated mark, one far off the doc.
   const lone = comment("lone", 200, 1500);
-  const near = comment("near", 900, 120);
+  const near = comment("near", 500, 350);
   const off = comment("off", 5000, 1500);
   // Act
-  const r = positionMarks([docRef], [mark("u", 100)], [lone, near, off]);
+  const r = positionMarks([docRef], [lone, near, off]);
   // Assert
-  assert.deepEqual(r, [{ id: "pos:lone", docId: "d1", kind: "position", bbox: lone.bbox }]);
+  assert.deepEqual(r.map((m) => m.id), ["pos:lone", "pos:near"]);
+  assert.deepEqual(r[0], { id: "pos:lone", docId: "d1", kind: "position", bbox: lone.bbox });
+});
+
+test("fallback prefers a nearby marked anchor over the comment's own position", () => {
+  // Arrange
+  const marked = anchor("u", 100);
+  const pos = anchor("pos:C1", 150, { positionOf: "C1" });
+  const c1 = comment("C1", 400, 150);
+  // Act
+  const r = nearestPairing([marked, pos], [c1]);
+  // Assert
+  assert.deepEqual(r, [{ commentId: "C1", anchorIds: ["u"] }]);
 });
 
 test("comment with an arrow gets no position mark", () => {
   // Arrange
   const c = comment("c", 200, 1500, { arrowToIds: ["u"] });
   // Act
-  const r = positionMarks([docRef], [mark("u", 100)], [c]);
+  const r = positionMarks([docRef], [c]);
   // Assert
   assert.deepEqual(r, []);
 });

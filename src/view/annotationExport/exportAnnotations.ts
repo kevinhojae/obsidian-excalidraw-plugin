@@ -46,8 +46,8 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
     if (file instanceof TFile) sources.set(d.elementId, await app.vault.cachedRead(file));
   }
 
-  // Comments with no mark nearby still point at the text they were written next to.
-  const allMarks = [...marks, ...positionMarks(docs, marks, comments)];
+  // A comment also points at the text it was written next to, even when no mark is there.
+  const allMarks = [...marks, ...positionMarks(docs, comments)];
   const probes = await probeMarks(view, docs, allMarks);
 
   const anchors: Anchor[] = [];

@@ -25,7 +25,9 @@ export const buildPairingPrompt = (anchors: Anchor[], comments: Comment[]): stri
     "- Otherwise use position (comments usually sit beside the passage, often to the right at a similar height)",
     "  and meaning (the comment text usually asks about or reacts to the quote).",
     "- An anchor with positionOf was not marked: it is the passage at that comment's own place. Use it only for",
-    "  that comment, and only when the comment is about that passage rather than the whole document.",
+    "  that comment. Prefer a marked anchor when the comment reacts to that quote; use the position anchor when",
+    "  no marked anchor fits, e.g. the nearby marks already have their own comments. Use [] only when the comment",
+    "  is about the whole document rather than the passage it sits next to.",
     "- A comment may refer to several anchors. A comment that is about the document as a whole gets [].",
     "- Anchors that no comment refers to are simply left out.",
     "- Every comment id must appear exactly once. Use only ids from the input.",
@@ -91,23 +93,25 @@ export const nearestPairing = (anchors: Anchor[], comments: Comment[]): Pairing[
     if (c.arrowToIds.length > 0) return { commentId: c.id, anchorIds: [...c.arrowToIds] };
     let best: { id: string; d: number } | null = null;
     for (const a of anchors) {
-      if (a.positionOf && a.positionOf !== c.id) continue;
+      if (a.positionOf) continue;
       const d = rectDistance(a.bbox, c.bbox);
       if (d <= NEAR_LIMIT && (!best || d < best.d)) best = { id: a.id, d };
     }
-    return { commentId: c.id, anchorIds: best ? [best.id] : [] };
+    // Without a nearby mark, the comment's own place is the best guess.
+    const own = anchors.find((a) => a.positionOf === c.id);
+    return { commentId: c.id, anchorIds: best ? [best.id] : own ? [own.id] : [] };
   });
 
 /** A comment this far beside a doc (scene px) still reads as written next to that doc's text. */
 const BESIDE_DOC = 600;
 
 /**
- * Comments with no arrow and no mark within NEAR_LIMIT, written on or beside a doc, get a "position" mark
- * at their own place, so the passage they sit next to can still be quoted.
+ * Every comment without an arrow, written on or beside a doc, gets a "position" mark at its own place,
+ * so the passage it sits next to can be quoted even when an unrelated mark is close by.
  */
-export const positionMarks = (docs: DocRef[], marks: Mark[], comments: Comment[]): Mark[] =>
+export const positionMarks = (docs: DocRef[], comments: Comment[]): Mark[] =>
   comments.flatMap((c) => {
-    if (c.arrowToIds.length > 0 || marks.some((m) => rectDistance(m.bbox, c.bbox) <= NEAR_LIMIT)) return [];
+    if (c.arrowToIds.length > 0) return [];
     const cx = c.bbox.x + c.bbox.width / 2;
     const cy = c.bbox.y + c.bbox.height / 2;
     const doc = docs.find(
