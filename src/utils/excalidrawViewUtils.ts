@@ -46,6 +46,7 @@ import { EmbeddableMDCustomProps } from "src/shared/Dialogs/EmbeddableSettings";
 import { nanoid } from "nanoid";
 import { t } from "src/lang/helpers";
 import { Mutable } from "@zsviczian/excalidraw/types/common/src/utility-types";
+import type { CaptureUpdateActionType } from "@zsviczian/excalidraw/types/element/src/store";
 import { EmbeddedFile } from "src/shared/EmbeddedFileLoader";
 import { CaptureUpdateAction } from "src/constants/constants";
 import { setSanitizedHtml } from "./htmlUtils";
@@ -764,6 +765,10 @@ function getSceneViewport(ea: ExcalidrawAutomate) {
   };
 }
 
+/**
+ * Insert a section-backed card with the normal immediate undo checkpoint.
+ * A caller deferring capture must finish its initial sizing and capture it.
+ */
 export async function addBackOfTheNoteCard(
   view: ExcalidrawView,
   title: string,
@@ -772,6 +777,7 @@ export async function addBackOfTheNoteCard(
   embeddableCustomData?: EmbeddableMDCustomProps,
   center: boolean = false,
   position?: { x: number; y: number },
+  captureUpdate: CaptureUpdateActionType = CaptureUpdateAction.IMMEDIATELY,
   strokeColor?: string,
   width: number = CARD_WIDTH,
 ): Promise<string> {
@@ -830,7 +836,7 @@ export async function addBackOfTheNoteCard(
     undefined,
     embeddableCustomData,
   );
-  await ea.addElementsToView(!center, false, true);
+  await ea.addElementsToView(!center, false, true, false, captureUpdate);
 
   const api = view.excalidrawAPI;
   const el = ea.getViewElements().find((el) => el.id === id);

@@ -13,6 +13,7 @@ import {
   HoverPopover,
 } from "obsidian";
 import { convertSVGImage, getSVGImageData } from "src/shared/svgConversionActions";
+import { insertCodeBlock } from "./managers/codeBlockInsertion";
 import {
   ExcalidrawElement,
   ExcalidrawImageElement,
@@ -197,10 +198,7 @@ import {
 import { setDynamicStyle } from "../utils/dynamicStyling";
 import { CustomEmbeddable, renderWebView } from "./components/CustomEmbeddable";
 import {
-  addBackOfTheNoteCard,
   pasteMarkdownAsEmbeddable,
-  fitEmbeddableHeightToContent,
-  PASTED_CARD_WIDTH,
   insertBackOfTheNoteContent,
   addTextWithOEmbed,
   deleteAppStateKeys,
@@ -6286,12 +6284,16 @@ export default class ExcalidrawView
         data.text
           .replaceAll("\r\n", "\n")
           .replaceAll("\r", "\n")
+          .trim()
           .match(/^`{3}[^\n]*\n.+\n`{3}\s*$/ms),
       );
       if (isCodeblock) {
         const clipboardText = data.text;
+        const { file, excalidrawAPI } = this;
         window.setTimeout(() => {
-          void this.pasteCodeBlock(clipboardText);
+          if (this.file === file && this.excalidrawAPI === excalidrawAPI && !this.isClosingOrMigrating()) {
+            void this.pasteCodeBlock(clipboardText);
+          }
         });
         return false;
       }
@@ -7087,52 +7089,7 @@ export default class ExcalidrawView
 
   public async pasteCodeBlock(data: string) {
     try {
-      data = data.replaceAll("\r\n", "\n").replaceAll("\r", "\n").trim();
-      const isCodeblock = Boolean(data.match(/^`{3}[^\n]*\n.+\n`{3}\s*$/ms));
-      if (!isCodeblock) {
-        const codeblockType = await GenericInputPrompt.Prompt(
-          this,
-          this.plugin,
-          this.app,
-          "type codeblock type",
-          "javascript, html, python, etc.",
-          "",
-        );
-        data = `\`\`\`${codeblockType.trim()}\n${data}\n\`\`\``;
-      }
-      let title = (
-        await GenericInputPrompt.Prompt(
-          this,
-          this.plugin,
-          this.app,
-          "Code Block Title",
-          "Enter title or leave empty for automatic title",
-          "",
-        )
-      ).trim();
-      if (title === "") {
-        title = "Code Block";
-      }
-      const sections = await this.getBackOfTheNoteSections();
-      if (sections.includes(title)) {
-        let i = 0;
-        while (sections.includes(`${title} ${++i}`)) {
-          // no-op
-        }
-        title = `${title} ${i}`;
-      }
-      const id = await addBackOfTheNoteCard(
-        this,
-        title,
-        false,
-        data,
-        undefined,
-        false,
-        undefined,
-        "transparent",
-        PASTED_CARD_WIDTH,
-      );
-      await fitEmbeddableHeightToContent(this, id);
+      await insertCodeBlock(this, data);
     } catch (error) {
       console.error(
         "unexpected error in pasteCodeBlock",
@@ -7626,8 +7583,9 @@ export default class ExcalidrawView
           t("PASTE_CODEBLOCK"),
           () => {
             void (async () => {
-              const data = await navigator.clipboard?.readText();
-              if (!data || data.trim() === "") {
+              const { file, excalidrawAPI } = this;
+              const data = await this.ownerWindow.navigator.clipboard?.readText();
+              if (!data?.trim() || this.file !== file || this.excalidrawAPI !== excalidrawAPI || this.isClosingOrMigrating()) {
                 return;
               }
               void this.pasteCodeBlock(data);
