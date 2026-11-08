@@ -48,7 +48,7 @@ import { setStyle } from "src/utils/styleUtils";
 import { ObsidianDraggable } from "src/types/types";
 import type React from "react";
 import { insertMarkdownImage } from "src/shared/MarkdownImage";
-import { predictViewType } from "src/utils/customEmbeddableUtils";
+import { HTML_FILE_EXTENSIONS, predictViewType } from "src/utils/customEmbeddableUtils";
 
 /*
 static getDropAction(event: DragEvent): string {
@@ -207,7 +207,10 @@ export class DropManager {
       ["md", "pdf"].includes(file.extension.toLowerCase()),
     );
     if (canInsertImage) actions.push("image", "image-fullsize");
-    if (canInsertImage || files.some(file => predictViewType(this.app, file) !== "empty")) {
+    if (canInsertImage || files.some(file =>
+      predictViewType(this.app, file) !== "empty" ||
+      HTML_FILE_EXTENSIONS.has(file.extension.toLowerCase()),
+    )) {
       actions.push("embeddable");
     }
     return actions;

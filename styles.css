@@ -2770,3 +2770,16 @@ button.excalidraw-font-picker {
   bottom: auto;
   margin-top: 4px;
 }
+
+/* Option/Alt held: let markdown embeds take pointer events so text can be
+   drag-selected without activating the embeddable. The interactive canvas is
+   stacked above embeddables, so drop it beneath them as an active embeddable
+   does (.excalidraw--embeddable-active). */
+.excalidraw-md-text-select .excalidraw .excalidraw__canvas.interactive {
+  z-index: var(--zIndex-canvas);
+}
+
+.excalidraw-md-text-select .excalidraw__embeddable-container .canvas-node {
+  pointer-events: auto;
+  user-select: text;
+}
