@@ -27,6 +27,10 @@ after each upstream merge.
   them, so rendered text can be drag-selected without activating the card or
   entering edit mode. Works on locked elements. Option+drag duplication is
   unavailable over Markdown cards; Cmd+D still duplicates.
+- **Cmd+C copies text selected in a Markdown card.** Upstream's copy handler
+  copied the selected elements and cancelled the event, so card text never
+  reached the clipboard. While a text selection lies in a card, Cmd+C copies
+  that text instead of selected elements.
 - **Copy canvas annotations as feedback** (command
   `excalidraw-export-canvas-annotations`). Turns the selected document card and
   the pen marks and sticky notes on it into plannotator-style "Markdown
@@ -113,7 +117,8 @@ the current stroke color, and their height is fitted to the rendered note
 | Option+drag text selection in a Markdown card, also on a locked element | pass (manual) |
 | Copy canvas annotations: quotes and line numbers match the source note | not recorded here yet |
 | Tool shortcuts with Korean 2-set input | not recorded here yet |
-| Cmd+C of selected card text | blocked: a synthetic key press copied the element instead; needs one manual check |
+| Copy event with text selected in a card is left to the browser; with no selection or a selection outside cards, Excalidraw still copies elements | pass (scripted) |
+| Cmd+C / Cmd+V of card text after Option+drag and in an activated card; clicking the canvas afterwards, Cmd+C copies the selected shape | pass (manual) |
 | Editing in a card, Korean IME | not tested |
 | Full app quit and restart | not tested |
 | Popout window, frames, rotation, groups | not tested |

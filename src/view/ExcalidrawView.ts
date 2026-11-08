@@ -2214,6 +2214,31 @@ export default class ExcalidrawView
       this.registerDomEvent(this.ownerWindow, "keyup", onKeyUp, false);
       //this.registerDomEvent(this.contentEl, "mouseleave", onBlurOrLeave, false); //https://github.com/zsviczian/obsidian-excalidraw-plugin/issues/2004
       this.registerDomEvent(this.ownerWindow, "blur", onBlurOrLeave, false);
+
+      /**
+       * Excalidraw's document-level copy handler copies the selected elements
+       * and cancels the event, so text selected inside a markdown embed never
+       * reaches the clipboard. Stop it in the capture phase when the selection
+       * lives in one of this view's embeds, leaving the browser default copy.
+       */
+      const onCopyEmbedText = (e: ClipboardEvent) => {
+        const selection = this.ownerDocument.getSelection();
+        if (!selection || selection.isCollapsed || !selection.anchorNode) {
+          return;
+        }
+        const anchor = selection.anchorNode;
+        const anchorEl =
+          anchor.nodeType === Node.ELEMENT_NODE
+            ? (anchor as Element)
+            : anchor.parentElement;
+        const embed = anchorEl?.closest(".excalidraw__embeddable-container");
+        if (embed && this.contentEl.contains(embed)) {
+          e.stopImmediatePropagation();
+        }
+      };
+      this.registerDomEvent(this.ownerWindow, "copy", onCopyEmbedText, {
+        capture: true,
+      });
       this.semaphores.viewloaded = true;
     });
 
