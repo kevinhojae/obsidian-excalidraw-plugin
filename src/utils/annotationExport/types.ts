@@ -21,7 +21,8 @@ export type Anchor = {
   positionOf?: string;
 };
 
-export type Comment = { id: string; text: string; bbox: Rect; arrowToIds: string[] };
+/** sticky: written in a sticky note (or another shape holding the text) rather than as free canvas text. */
+export type Comment = { id: string; text: string; bbox: Rect; arrowToIds: string[]; sticky: boolean };
 
 /** anchorIds = [] means general feedback about the document. */
 export type Pairing = { commentId: string; anchorIds: string[] };

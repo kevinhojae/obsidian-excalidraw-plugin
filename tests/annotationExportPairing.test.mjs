@@ -5,6 +5,7 @@ import {
   nearestPairing,
   parsePairingResponse,
   positionMarks,
+  stickyGeneralPairings,
   toFeedbackItems,
 } from "../src/utils/annotationExport/pairing.ts";
 
@@ -180,4 +181,16 @@ test("prompt marks position anchors with their comment", () => {
   const p = buildPairingPrompt([pos], [comment("C1", 200, 1500)]);
   // Assert
   assert.ok(p.includes('"positionOf": "C1"'));
+});
+
+test("stickies without arrows are general; arrowed stickies and free text stay open", () => {
+  // Arrange
+  const plain = comment("plain", 900, 100, { sticky: true });
+  const arrowed = comment("arrowed", 900, 300, { sticky: true, arrowToIds: ["u"] });
+  const text = comment("text", 900, 500, { sticky: false });
+  // Act
+  const r = stickyGeneralPairings([plain, arrowed, text]);
+  // Assert
+  assert.deepEqual(r.general, [{ commentId: "plain", anchorIds: [] }]);
+  assert.deepEqual(r.open.map((c) => c.id), ["arrowed", "text"]);
 });

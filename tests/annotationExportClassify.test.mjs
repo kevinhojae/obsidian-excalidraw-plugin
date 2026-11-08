@@ -63,7 +63,7 @@ test("stickynote text becomes comment with sticky bbox", () => {
   // Act
   const r = run([doc("d1"), sticky, text]);
   // Assert
-  assert.deepEqual(r.comments, [{ id: "s", text: "wrapped", bbox: { x: 900, y: 100, width: 250, height: 120 }, arrowToIds: [] }]);
+  assert.deepEqual(r.comments, [{ id: "s", text: "wrapped", bbox: { x: 900, y: 100, width: 250, height: 120 }, arrowToIds: [], sticky: true }]);
 });
 
 test("free text is a comment whether it sits outside or inside the doc bbox", () => {
@@ -73,7 +73,7 @@ test("free text is a comment whether it sits outside or inside the doc bbox", ()
   // Act
   const r = run([doc("d1"), outside, inside]);
   // Assert
-  assert.deepEqual(r.comments.map((c) => [c.id, c.text]), [["o", "아주 중요해"], ["i", "inside"]]);
+  assert.deepEqual(r.comments.map((c) => [c.id, c.text, c.sticky]), [["o", "아주 중요해", false], ["i", "inside", false]]);
 });
 
 test("arrow from sticky to mark fills arrowToIds", () => {

@@ -8,6 +8,7 @@ import {
   nearestPairing,
   parsePairingResponse,
   positionMarks,
+  stickyGeneralPairings,
   toFeedbackItems,
 } from "src/utils/annotationExport/pairing";
 import type { Anchor, DocRef, Pairing, Rect } from "src/utils/annotationExport/types";
@@ -46,8 +47,10 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
     if (file instanceof TFile) sources.set(d.elementId, await app.vault.cachedRead(file));
   }
 
+  // Stickies without arrows are general by convention; only the rest needs pairing.
+  const { general, open } = stickyGeneralPairings(comments);
   // A comment also points at the text it was written next to, even when no mark is there.
-  const allMarks = [...marks, ...positionMarks(docs, comments)];
+  const allMarks = [...marks, ...positionMarks(docs, open)];
   const probes = await probeMarks(view, docs, allMarks);
 
   const anchors: Anchor[] = [];
@@ -73,12 +76,12 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
     });
   }
 
-  const working = new Notice("AI가 코멘트를 묶는 중…", 0);
-  let pairings: Pairing[] | null = null;
+  let pairings: Pairing[] | null = open.length === 0 ? [] : null;
   let fallbackReason = "";
+  const working = open.length ? new Notice("AI가 코멘트를 묶는 중…", 0) : null;
   try {
     const bin = resolveClaudePath(view.plugin.settings.annotationExportClaudePath ?? "");
-    const prompt = buildPairingPrompt(anchors, comments);
+    const prompt = buildPairingPrompt(anchors, open);
     for (let attempt = 0; attempt < 2 && !pairings; attempt++) {
       const r = await runClaude(bin, prompt);
       if ("reason" in r) {
@@ -86,14 +89,15 @@ export const exportAnnotations = async (view: ExcalidrawView): Promise<void> => 
         if (r.reason !== "exit") break;
         continue;
       }
-      pairings = parsePairingResponse(r.stdout, anchors, comments);
+      pairings = parsePairingResponse(r.stdout, anchors, open);
       if (!pairings) fallbackReason = "AI 응답 형식이 맞지 않음";
     }
   } finally {
-    working.hide();
+    working?.hide();
   }
   const usedFallback = !pairings;
-  if (usedFallback) pairings = nearestPairing(anchors, comments);
+  if (usedFallback) pairings = nearestPairing(anchors, open);
+  pairings = [...general, ...pairings];
 
   // General comments go to the nearest doc.
   const nearestDoc = (r: Rect): DocRef => {

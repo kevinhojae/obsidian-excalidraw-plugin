@@ -121,6 +121,15 @@ export const positionMarks = (docs: DocRef[], comments: Comment[]): Mark[] =>
     return doc ? [{ id: `pos:${c.id}`, docId: doc.elementId, kind: "position" as const, bbox: c.bbox }] : [];
   });
 
+/** The reviewer's convention: a sticky note is about the whole document unless an arrow ties it to a mark. */
+export const stickyGeneralPairings = (comments: Comment[]): { general: Pairing[]; open: Comment[] } => {
+  const isGeneral = (c: Comment) => c.sticky && c.arrowToIds.length === 0;
+  return {
+    general: comments.filter(isGeneral).map((c): Pairing => ({ commentId: c.id, anchorIds: [] })),
+    open: comments.filter((c) => !isGeneral(c)),
+  };
+};
+
 /** Build output items. Quotes and line numbers always come from anchors, never from the AI. */
 export const toFeedbackItems = (
   pairings: Pairing[],

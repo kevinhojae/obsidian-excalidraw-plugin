@@ -105,13 +105,13 @@ export const classifySelection = (
     const box = bboxOf(e);
     const boundText = boundTextByContainer.get(e.id);
     if (boundText && e.type !== "arrow") {
-      comments.push({ id: e.id, text: boundText.originalText ?? boundText.text ?? "", bbox: box, arrowToIds: [] });
+      comments.push({ id: e.id, text: boundText.originalText ?? boundText.text ?? "", bbox: box, arrowToIds: [], sticky: true });
       continue;
     }
     if (e.type === "text") {
       // Doc body text lives in the embeddable's DOM, so every canvas text element is a reviewer comment.
       if (!e.containerId) {
-        comments.push({ id: e.id, text: e.originalText ?? e.text ?? "", bbox: box, arrowToIds: [] });
+        comments.push({ id: e.id, text: e.originalText ?? e.text ?? "", bbox: box, arrowToIds: [], sticky: false });
       }
       continue;
     }
