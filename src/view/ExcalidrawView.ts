@@ -2159,6 +2159,15 @@ export default class ExcalidrawView
       await this.addSlidingPanesListner(); //awaiting this because when using workspaces, onLayoutReady comes too early
       this.addParentMoveObserver();
 
+      /**
+       * While Option/Alt is held, markdown embeds receive pointer
+       * events so their rendered text can be drag-selected without activating
+       * the embeddable (see `.excalidraw-md-text-select` in styles.css).
+       */
+      const setMdTextSelect = (on: boolean) => {
+        this.contentEl.toggleClass("excalidraw-md-text-select", on);
+      };
+
       const onKeyUp = (e: KeyboardEvent) => {
         this.modifierKeyDown = {
           shiftKey: e.shiftKey,
@@ -2166,6 +2175,7 @@ export default class ExcalidrawView
           altKey: e.altKey,
           metaKey: e.metaKey,
         };
+        setMdTextSelect(e.altKey);
       };
 
       const onKeyDown = (e: KeyboardEvent) => {
@@ -2175,9 +2185,11 @@ export default class ExcalidrawView
           altKey: e.altKey,
           metaKey: e.metaKey,
         };
+        setMdTextSelect(e.altKey);
       };
 
       const onBlurOrLeave = () => {
+        setMdTextSelect(false);
         if (
           this.semaphores.windowMigrating ||
           !this.excalidrawAPI ||
