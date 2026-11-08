@@ -151,6 +151,8 @@ export function setFileToLocalGraph(app: App, file: TFile) {
   }
 }
 
+export const HTML_FILE_EXTENSIONS = new Set(["html", "htm"]);
+
 export function predictViewType(app: App, file: TFile): string {
   const ext = file.extension?.toLowerCase?.() ?? "";
 

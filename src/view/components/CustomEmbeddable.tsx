@@ -3,7 +3,7 @@ import {
   ExcalidrawEmbeddableElement,
 } from "@zsviczian/excalidraw/types/element/src/types";
 import type ExcalidrawView from "src/view/ExcalidrawView";
-import { Notice, requireApiVersion } from "obsidian";
+import { Notice, requireApiVersion, TFile } from "obsidian";
 import * as React from "react";
 import { isObsidianThemeDark } from "src/utils/obsidianUtils";
 import {
@@ -21,6 +21,7 @@ import {
   setFileToLocalGraph,
   createLeaf,
   predictViewType,
+  HTML_FILE_EXTENSIONS,
 } from "src/utils/customEmbeddableUtils";
 import { mountEmbeddableHost } from "src/utils/embeddableMountPlan";
 import { EmbeddableMDCustomProps } from "src/shared/Dialogs/EmbeddableSettings";
@@ -1496,6 +1497,48 @@ function RenderObsidianView({
   return null;
 }
 
+//--------------------------------------------------------------------------------
+//Render a vault .html/.htm file in the same sandbox used for data: URLs
+//--------------------------------------------------------------------------------
+function RenderHtmlFile({
+  file,
+  view,
+  id,
+}: {
+  file: TFile;
+  view: ExcalidrawView;
+  id: string;
+}): React.JSX.Element {
+  const React = view.packages.react;
+  const [srcDoc, setSrcDoc] = React.useState<string>(null);
+
+  React.useEffect(() => {
+    const load = () =>
+      view.app.vault
+        .cachedRead(file)
+        .then((html) => setSrcDoc(injectDefensiveCsp(html)));
+    void load();
+    const ref = view.app.vault.on("modify", (f) => {
+      if (f.path === file.path) void load();
+    });
+    return () => view.app.vault.offref(ref);
+  }, [file.path]);
+
+  return (
+    <iframe
+      ref={(ref) => view.updateEmbeddableRef(id, ref)}
+      className="excalidraw__embeddable"
+      title={file.basename}
+      sandbox={DATA_URL_IFRAME_SANDBOX}
+      srcDoc={srcDoc ?? ""}
+      style={{
+        overflow: "hidden",
+        borderRadius: "var(--embeddable-radius)",
+      }}
+    />
+  );
+}
+
 export const CustomEmbeddable: React.FC<{
   element: ExcalidrawEmbeddableElement;
   view: ExcalidrawView;
@@ -1504,6 +1547,10 @@ export const CustomEmbeddable: React.FC<{
 }> = ({ element, view, appState, linkText }) => {
   const React = view.packages.react;
   const containerRef: React.RefObject<HTMLDivElement> = React.useRef(null);
+  const { file } = processLinkText(linkText, view);
+  if (file && HTML_FILE_EXTENSIONS.has(file.extension.toLowerCase())) {
+    return <RenderHtmlFile file={file} view={view} id={element.id} />;
+  }
   const theme = getTheme(view, appState.theme);
   const mdProps: EmbeddableMDCustomProps =
     (element.customData?.mdProps as EmbeddableMDCustomProps) || null;
