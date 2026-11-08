@@ -1,7 +1,11 @@
 # kevinhojae fork: Markdown paste + annotations above embeddables
 
-Based on upstream `2.29.1`. Keeps the upstream plugin id, so it
-replaces the community build instead of running next to it.
+Based on upstream `2.29.2` (engine `0.18.147`). Keeps the upstream plugin id,
+so it replaces the community build instead of running next to it.
+
+This file is the inventory of what the fork must keep working. Add every new
+fork feature here, with a row in the verification table, and re-run the table
+after each upstream merge.
 
 ## What it adds
 
@@ -14,8 +18,27 @@ replaces the community build instead of running next to it.
   scene order are painted above it, so `A -> line -> B` shows the line over A
   and under B, and clicking such an element selects it rather than the
   embeddable beneath. Applies to every embeddable, not only pasted cards. This needs
-  the engine fork: `kevinhojae/excalidraw`, branch
-  `feat/embeddable-overlay-bands`.
+  the engine fork: `kevinhojae/excalidraw`, branch `master`.
+- **Vault `.html` embeds.** `[[x.html]]` embeddables render the file in an
+  iframe `srcdoc` with the same sandbox and CSP as `data:` URLs. Dropping an
+  `.html` file on the canvas inserts it as an embeddable.
+- **Option+drag selects text in Markdown embeds.** While Option (Alt) is held,
+  Markdown cards take the pointer and the interactive canvas drops beneath
+  them, so rendered text can be drag-selected without activating the card or
+  entering edit mode. Works on locked elements. Option+drag duplication is
+  unavailable over Markdown cards; Cmd+D still duplicates.
+- **Copy canvas annotations as feedback** (command
+  `excalidraw-export-canvas-annotations`). Turns the selected document card and
+  the pen marks and sticky notes on it into plannotator-style "Markdown
+  Annotations" with file path, line numbers and quoted source text, and copies
+  it to the clipboard. Pairing comments with marks uses `claude -p`; see
+  `docs/superpowers/specs/2026-11-05-canvas-annotation-export-design.md`.
+- **Shortcuts on non-Latin keyboard layouts** (engine fork). Tool and picker
+  single-letter shortcuts work with Korean 2-set input.
+
+Vault setting, not code: `modifierKeyOverrides` in the vault's `data.json`
+adds `Mod+d` and `Mod+Shift+l` so these Excalidraw shortcuts are not consumed
+by Obsidian hotkeys. The install script never writes `data.json`.
 
 ## Build
 
@@ -85,6 +108,11 @@ the current stroke color, and their height is fitted to the rendered note
 | Save, reload the vault window: order and layers persist | pass |
 | PNG export still works | pass |
 | Install / rollback script on the test vault | pass |
+| `[[x.html]]` embed renders inside a sandboxed iframe (postMessage probe) | pass |
+| Option held: hit-test over Markdown card text returns the text, not the canvas; click neither selects nor activates the card; release restores | pass (scripted) |
+| Option+drag text selection in a Markdown card, also on a locked element | pass (manual) |
+| Copy canvas annotations: quotes and line numbers match the source note | not recorded here yet |
+| Tool shortcuts with Korean 2-set input | not recorded here yet |
 | Cmd+C of selected card text | blocked: a synthetic key press copied the element instead; needs one manual check |
 | Editing in a card, Korean IME | not tested |
 | Full app quit and restart | not tested |
