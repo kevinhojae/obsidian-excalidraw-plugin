@@ -51,6 +51,38 @@ const frontmatterEnd = (lines: string[]): number => {
   return close < 0 ? 0 : close + 1;
 };
 
+/**
+ * A box around a table column reads its cells top to bottom, while the source writes the table row by row,
+ * so the text is not contiguous. Accept it when all its words appear in order inside one block.
+ */
+const findWordsInOneBlock = (
+  stream: string,
+  lineOfChar: number[],
+  blocks: LineRange[],
+  probe: Probe,
+): { start: number; end: number; dist: number } | null => {
+  const words = probe.text.split(/\s+/).map(normalizeRenderedText).filter(Boolean);
+  if (words.length < 2) return null;
+  let best: { start: number; end: number; dist: number } | null = null;
+  for (let at = stream.indexOf(words[0]); at >= 0; at = stream.indexOf(words[0], at + 1)) {
+    const blockEnd = blocks[lineOfChar[at]].lineEnd - 1;
+    let pos = at + words[0].length;
+    let ok = true;
+    for (const w of words.slice(1)) {
+      const idx = stream.indexOf(w, pos);
+      if (idx < 0 || lineOfChar[idx] > blockEnd) {
+        ok = false;
+        break;
+      }
+      pos = idx + w.length;
+    }
+    if (!ok) continue;
+    const dist = Math.abs(at / Math.max(stream.length, 1) - probe.progress);
+    if (!best || dist < best.dist) best = { start: lineOfChar[at], end: lineOfChar[pos - 1], dist };
+  }
+  return best;
+};
+
 /** Find the source lines a probe's text came from. Among repeats, the one closest to progress wins. */
 export const locateQuote = (
   source: string,
@@ -79,6 +111,7 @@ export const locateQuote = (
     const dist = Math.abs(at / Math.max(stream.length, 1) - probe.progress);
     if (!best || dist < best.dist) best = { start, end, dist };
   }
+  if (!best) best = findWordsInOneBlock(stream, lineOfChar, blocks, probe);
   if (!best) return null;
 
   return {

@@ -102,3 +102,33 @@ test("duplicate text resolves by text progress, not line fraction", () => {
   // Assert
   assert.equal(r.lineStart, 102);
 });
+
+const columnTable = [
+  "### 칸마다 계산",
+  "",
+  "| 칸 | 과거 3개월 합 | 과거 비율 | 이번 달 계산 |",
+  "| --- | --- | --- | --- |",
+  "| 한국 · 적어 둠 | 희망 2,000 → 실제 1,600 | **80%** | 희망 500 × 80% = **400** |",
+  "| 한국 · 안 적음 | 300건 → 6,000 | **1건당 20** | 60건 × 20 = **1,200** |",
+  "| 대만 · 적어 둠 | 0건 | ? | → 아래 1단계 |",
+  "",
+  "다음 문단에도 과거 비율이 나옵니다.",
+].join("\n");
+
+test("boxed table column maps to the whole table even though its cells are not contiguous", () => {
+  // Arrange
+  const probe = { text: "과거 비율 80% 1건당 20 ?", progress: 0.3 };
+  // Act
+  const r = locateQuote(columnTable, probe);
+  // Assert
+  assert.deepEqual(r, { lineStart: 3, lineEnd: 7, quote: "과거 비율 80% 1건당 20 ?" });
+});
+
+test("words scattered across different blocks are not stitched together", () => {
+  // Arrange: "80%" is only in the table, "다음 문단" only after it.
+  const probe = { text: "80% 다음 문단", progress: 0.5 };
+  // Act
+  const r = locateQuote(columnTable, probe);
+  // Assert
+  assert.equal(r, null);
+});
